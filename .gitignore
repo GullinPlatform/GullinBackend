@@ -103,3 +103,7 @@ ENV/
 # IDEA IDE
 .idea/
 
+# System File
+.DS_Store
+
+Gullin/tmp\.sqlite3
