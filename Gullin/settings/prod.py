@@ -12,8 +12,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open(os.path.join(BASE_DIR, 'settings/secret_key')) as f:
-	SECRET_KEY = f.read().strip()
+SECRET_KEY = open(os.path.join(BASE_DIR, 'settings/secret_key')).read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -28,6 +27,7 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+	'Gullin.modules.users'
 ]
 
 MIDDLEWARE = [
@@ -41,6 +41,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'Gullin.urls'
+AUTH_USER_MODEL = 'users.User'
 
 TEMPLATES = [
 	{
