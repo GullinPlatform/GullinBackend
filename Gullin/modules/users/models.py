@@ -44,6 +44,10 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+	"""
+	Basic Users Model.
+	"""
+
 	# User Login
 	email = models.EmailField(unique=True, blank=True,
 	                          error_messages={'unique': "A user with that email already exists."})
@@ -81,12 +85,15 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
 
 	# Settings
 	USERNAME_FIELD = 'email'
 	objects = UserManager()
 
 	class Meta:
+		verbose_name = 'Base User'
+		verbose_name_plural = 'Base Users'
 		ordering = ['-created']
 
 	def __str__(self):
@@ -111,14 +118,16 @@ class InvestorUser(models.Model):
 	Investor Users are able to invest in ICOs, trade ICO Tokens.
 	All users registered from frontend should be investor users.
 	"""
-	LEVEL_CHOICES = ((-1, 'Not Verified'),
-	                 (0, 'Email Verified'),
-	                 (1, 'Phone Verified'),
-	                 (2, 'ID Verified US Citizen'),
-	                 (3, 'ID Verified non-US Citizen or Accredited Investor'))
+	LEVEL_CHOICES = (
+		(-1, 'Not Verified'),  # Not Verified
+		(0, 'LEVEL 0'),  # Email Verified
+		(1, 'LEVEL 1'),  # Phone Verified
+		(2, 'LEVEL 2'),  # ID Verified US Citizen
+		(3, 'LEVEL 3'),  # ID Verified non-US Citizen or Accredited Investor
+	)
 
 	# Link to User Model
-	user = models.OneToOneField('User', related_name='investor', on_delete=models.PROTECT)
+	user = models.OneToOneField('User', related_name='info', on_delete=models.PROTECT)
 
 	# User Info
 	avatar = models.ImageField(upload_to=user_avatar_dir, default='avatars/default.jpg', null=True, blank=True)
@@ -128,10 +137,22 @@ class InvestorUser(models.Model):
 
 	# Verification
 	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1)
-	id_verification = models.OneToOneField('IDVerify', related_name='user', on_delete=models.PROTECT)
-	accredited_investor_verification = models.OneToOneField('AccreditedInvestorVerify', related_name='user', on_delete=models.PROTECT)
+	id_verification = models.OneToOneField('IDVerification', related_name='investor_user', on_delete=models.PROTECT)
+	accredited_investor_verification = models.OneToOneField('InvestorVerification', related_name='investor_user', on_delete=models.PROTECT)
+
+	# TimeStamp
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = 'Investor'
+		verbose_name_plural = 'Subusers - Investor'
 
 	def __str__(self):
+		return self.full_name
+
+	@property
+	def full_name(self):
 		return self.first_name + ' ' + self.last_name
 
 
@@ -140,7 +161,24 @@ class CompanyUser(models.Model):
 	Company Users are able to upload press releases, check company profile.
 	Company Users can only be added by site admins.
 	"""
+	# Link to User Model
 	user = models.OneToOneField('User', related_name='company_user', on_delete=models.PROTECT)
+
+	# Link to Company Model
+	# TODO
+
+	# TimeStamp
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = 'Company User'
+		verbose_name_plural = 'Subusers - Company User'
+
+	def __str__(self):
+		# return self.company.name
+		# TODO
+		pass
 
 
 class AnalystUser(models.Model):
@@ -148,10 +186,39 @@ class AnalystUser(models.Model):
 	Analyst Users are able to submit analyses to ICOs or companies .
 	Analyst Users can only be added by site admins.
 	"""
-	user = models.OneToOneField('User', related_name='analyst', on_delete=models.PROTECT)
+	ANALYST_TYPE_CHOICES = (
+		(0, 'Professional'),
+		(1, 'Regular')
+	)
+
+	# Link to User Model
+	user = models.OneToOneField('User', related_name='analyst_user', on_delete=models.PROTECT)
+
+	# User Info
+	avatar = models.ImageField(upload_to=user_avatar_dir, default='avatars/default.jpg', null=True, blank=True)
+	first_name = models.CharField(max_length=30, null=True, blank=True)
+	last_name = models.CharField(max_length=50, null=True, blank=True)
+
+	# Analyst Info
+	analyst_type = models.IntegerField(choices=ANALYST_TYPE_CHOICES, default=1)
+
+	# TimeStamp
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+
+	class Meta:
+		verbose_name = 'Analyst'
+		verbose_name_plural = 'Subusers - Analyst'
+
+	def __str__(self):
+		return self.full_name
+
+	@property
+	def full_name(self):
+		return self.first_name + ' ' + self.last_name
 
 
-class IDVerify(models.Model):
+class IDVerification(models.Model):
 	ID_TYPE_CHOICES = (('Driver License', 'Driver License'),
 	                   ('Photo ID', 'Photo ID'),
 	                   ('Passport', 'Passport'))
@@ -160,11 +227,15 @@ class IDVerify(models.Model):
 	official_id = models.FileField(upload_to=official_id_dir, null=True, blank=True)
 	nationality = models.CharField(max_length=20, null=True, blank=True)
 
+	class Meta:
+		verbose_name = 'ID Verification'
+		verbose_name_plural = 'User Verification - ID'
+
 	def __str__(self):
 		return self.official_id_type
 
 
-class AccreditedInvestorVerify(models.Model):
+class InvestorVerification(models.Model):
 	DOC_CHOICES = (('Tax Return', 'Tax Return'),
 	               ('Bank Statement', 'Bank Statement'))
 
@@ -172,48 +243,19 @@ class AccreditedInvestorVerify(models.Model):
 	doc1 = models.FileField(upload_to=official_id_dir, null=True, blank=True)
 	doc2 = models.FileField(upload_to=official_id_dir, null=True, blank=True)
 
+	class Meta:
+		verbose_name = 'Accredited Investor Verification'
+		verbose_name_plural = 'User Verification - Accredited Investor'
+
 	def __str__(self):
 		return self.doc_type
 
 
-class VerifyToken(models.Model):
-	user = models.OneToOneField('User', related_name='email_token', on_delete=models.PROTECT)
+class VerificationToken(models.Model):
+	user = models.OneToOneField('User', related_name='verification_token', on_delete=models.PROTECT)
 	token = models.CharField(max_length=200)
 	expire_time = models.DateTimeField(auto_now_add=True)
 
 	@property
 	def is_expired(self):
 		return (timezone.now() - timedelta(hours=1)) > self.expire_time
-
-
-
-# User
-# UID
-# Email
-# First Name
-# Last Name
-# Salt
-# Password
-# Phone Number
-# TOTP enabled (google auth app)
-# Last login time
-# Last login IP
-# Create time
-# Update time
-# Verification level (0, 1, 2, 3)
-
-
-# ID Verification
-# UID
-# Official ID (file/picture)
-# Type (passport, driver license, National ID)
-# Nationality
-
-# Accredited Investor Verification
-# UID
-# Tax returns 1
-# Tax returns 2
-# Verify Code
-# Code
-# Expire datetime
-# UID
