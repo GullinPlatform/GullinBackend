@@ -26,5 +26,13 @@ def official_id_dir(instance, filename):
 	return 'user/' + _filename(instance, filename, r'official_id')
 
 
+def investor_doc_dir(instance, filename):
+	return 'user/' + _filename(instance, filename, r'investor_doc')
+
+
 def company_icon_dir(instance, filename):
-	return 'project/' + _filename(instance, filename, r'icon')
+	return 'company/' + _filename(instance, filename, r'icon')
+
+
+def company_member_avatar_dir(instance, filename):
+	return 'company/' + _filename(instance, filename, r'member_avatars')
