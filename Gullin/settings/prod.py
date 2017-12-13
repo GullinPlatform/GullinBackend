@@ -27,7 +27,8 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
-	'Gullin.modules.users'
+	'Gullin.modules.users',
+	'Gullin.modules.companies',
 ]
 
 MIDDLEWARE = [
