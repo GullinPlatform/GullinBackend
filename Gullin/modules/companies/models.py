@@ -16,6 +16,8 @@ class Company(models.Model):
 	# Token Detail
 	token_detail = models.OneToOneField('TokenDetail', null=True, on_delete=models.PROTECT)
 
+	# Press Releases
+
 	# Project Description
 
 	# Token Sale Plan
@@ -85,7 +87,7 @@ class TokenDetail(models.Model):
 	hard_market_cap = models.FloatField()
 	market_cap_unit = models.CharField(max_length=10)
 
-	ico_destination_address = models.CharField(max_length=200)
+	wallet_address = models.CharField(max_length=200)
 
 	is_finished = models.BooleanField(default=False)
 

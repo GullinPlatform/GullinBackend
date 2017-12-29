@@ -29,6 +29,7 @@ INSTALLED_APPS = [
 	'django.contrib.staticfiles',
 	'Gullin.modules.users',
 	'Gullin.modules.companies',
+	'Gullin.modules.wallets',
 ]
 
 MIDDLEWARE = [

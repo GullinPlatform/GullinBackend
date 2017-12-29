@@ -107,3 +107,4 @@ ENV/
 .DS_Store
 
 Gullin/tmp\.sqlite3
+/Gullin/settings/aws_secret_key

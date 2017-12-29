@@ -127,7 +127,7 @@ class InvestorUser(models.Model):
 	)
 
 	# Link to User Model
-	user = models.OneToOneField('User', related_name='info', on_delete=models.PROTECT)
+	user = models.OneToOneField('User', related_name='investor_user', on_delete=models.PROTECT)
 
 	# User Info
 	avatar = models.ImageField(upload_to=user_avatar_dir, default='avatars/default.jpg', null=True, blank=True)
@@ -165,7 +165,7 @@ class CompanyUser(models.Model):
 	user = models.OneToOneField('User', related_name='company_user', on_delete=models.PROTECT)
 
 	# Link to Company Model
-	# TODO
+	company = models.OneToOneField('companies.Company', related_name='user', on_delete=models.PROTECT, null=True)
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -176,9 +176,7 @@ class CompanyUser(models.Model):
 		verbose_name_plural = 'Subusers - Company User'
 
 	def __str__(self):
-		# return self.company.name
-		# TODO
-		pass
+		return self.company.name
 
 
 class AnalystUser(models.Model):
