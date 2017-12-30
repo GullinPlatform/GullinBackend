@@ -46,6 +46,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
 	"""
 	Basic Users Model.
+	For User Authentication
 	"""
 
 	# User Login
@@ -217,6 +218,10 @@ class AnalystUser(models.Model):
 
 
 class IDVerification(models.Model):
+	"""
+	ID Verification model is used for verify InvestorUser identity.
+	"""
+
 	ID_TYPE_CHOICES = (('Driver License', 'Driver License'),
 	                   ('Photo ID', 'Photo ID'),
 	                   ('Passport', 'Passport'))
@@ -234,6 +239,10 @@ class IDVerification(models.Model):
 
 
 class InvestorVerification(models.Model):
+	"""
+	Investor Verification is for Accredited Investor Verification for US based InvestorUsers
+	"""
+
 	DOC_CHOICES = (('Tax Return', 'Tax Return'),
 	               ('Bank Statement', 'Bank Statement'))
 
@@ -249,9 +258,16 @@ class InvestorVerification(models.Model):
 		return self.doc_type
 
 
-class VerificationToken(models.Model):
-	user = models.OneToOneField('User', related_name='verification_token', on_delete=models.PROTECT)
-	token = models.CharField(max_length=200)
+class VerificationCode(models.Model):
+	"""
+	Verification Code model
+	1. For verify user email
+	2. For verify user phone number
+	3. For 2 factor verification (not TOTP enabled users only, if user enabled TOTP, TOTP generated code should be used instead)
+	"""
+
+	user = models.OneToOneField('User', related_name='verification_code', on_delete=models.PROTECT)
+	code = models.CharField(max_length=200)
 	expire_time = models.DateTimeField(auto_now_add=True)
 
 	@property

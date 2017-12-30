@@ -6,6 +6,10 @@ from Gullin.utils.upload_dir import company_icon_dir, company_member_avatar_dir
 
 
 class Company(models.Model):
+	"""
+	Company Model
+	Contains company basic info, social media info, etc.
+	"""
 	# Company Info
 	name = models.CharField(max_length=50, unique=True)
 	logo = models.ImageField(upload_to=company_icon_dir, null=True)
@@ -47,7 +51,8 @@ class Company(models.Model):
 
 class TokenDetail(models.Model):
 	"""
-	Token Detail will only store ICO info, all trading data should be retrieved from exchange side
+	TokenDetail Model
+	Token Detail stores all token sake (ICO) info
 	"""
 	TOKEN_TYPE_CHOICES = (
 		(0, 'Trading Token'),
@@ -65,19 +70,17 @@ class TokenDetail(models.Model):
 	# Token Detail
 	logo = models.ImageField(upload_to=company_icon_dir, null=True)
 	code = models.CharField(max_length=10)
-	type = models.IntegerField(default=1, choices=TOKEN_TYPE_CHOICES)
+	is_finished = models.BooleanField(default=False)
 
-	# ICO info
-
-	## ICO Time
+	# ICO Time
 	start_datetime = models.DateTimeField()
 	end_datetime = models.DateTimeField()
 
-	## ICO Type
+	# ICO Type
 	ico_token_type = models.IntegerField(choices=ICO_TOKEN_TYPE_CHOICES)
 	ico_stage_type = models.IntegerField(choices=ICO_STAGE_TYPE_CHOICES)
 
-	## Tokenomics
+	# Tokenomics
 	init_price = models.FloatField()
 	current_price = models.FloatField()
 	total_token_supply = models.IntegerField()
@@ -87,9 +90,8 @@ class TokenDetail(models.Model):
 	hard_market_cap = models.FloatField()
 	market_cap_unit = models.CharField(max_length=10)
 
+	# Wallet Address
 	wallet_address = models.CharField(max_length=200)
-
-	is_finished = models.BooleanField(default=False)
 
 	# Timestamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -103,6 +105,10 @@ class TokenDetail(models.Model):
 
 
 class PressRelease(models.Model):
+	"""
+	Press Release Model
+	Press Release is companies updates, should only submitted by CompanyUsers or admin user
+	"""
 	# Company
 	company = models.ForeignKey('Company', related_name='press_releases', on_delete=models.PROTECT)
 
@@ -120,6 +126,10 @@ class PressRelease(models.Model):
 
 
 class CompanyMember(models.Model):
+	"""
+	Company Member Model
+	contains company member info
+	"""
 	MEMBER_TYPE_CHOICES = (
 		(0, 'Advisor'),
 		(1, 'Member'),

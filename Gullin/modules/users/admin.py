@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import Group as BuiltInGroup
 
-from .models import User, InvestorUser, CompanyUser, AnalystUser, InvestorVerification, IDVerification, VerificationToken
+from .models import User, InvestorUser, CompanyUser, AnalystUser, InvestorVerification, IDVerification, VerificationCode
 from .forms import UserCreationForm
 
 
@@ -102,10 +102,10 @@ class InvestorVerificationAdmin(admin.ModelAdmin):
 	pass
 
 
-@admin.register(VerificationToken)
-class VerificationTokenAdmin(admin.ModelAdmin):
+@admin.register(VerificationCode)
+class VerificationCodeAdmin(admin.ModelAdmin):
 	# List display Settings
-	list_display = ('user', 'token', 'expire_time', 'is_expired',)
+	list_display = ('user', 'code', 'expire_time', 'is_expired',)
 	search_fields = ('user',)
 	# list_filter = ('is_expired',)
 	ordering = ('expire_time',)
