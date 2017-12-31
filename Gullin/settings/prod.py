@@ -7,12 +7,13 @@ See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 """
 
 import os
+import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = open(os.path.join(BASE_DIR, 'settings/secret_key')).read().strip()
+SECRET_KEY = open(os.path.join(BASE_DIR, 'settings/securities/django_secret_key')).read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -30,6 +31,7 @@ INSTALLED_APPS = [
 	'Gullin.modules.users',
 	'Gullin.modules.companies',
 	'Gullin.modules.wallets',
+	'Gullin.utils.rest_framework_jwt'
 ]
 
 MIDDLEWARE = [
@@ -100,3 +102,31 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 # Set auto redirect to false
 APPEND_SLASH = False
+
+# Django Rest Framework Settings
+REST_FRAMEWORK = {
+	'DEFAULT_PERMISSION_CLASSES': (
+		'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+	)
+}
+
+# Json Web Token Settings
+# How to generate RS256 keys:
+# > ssh-keygen -t rsa -b 2048 -f jwt_secret.key
+# > openssl rsa -in jwt_secret.key -pubout -outform PEM -out jwt_secret.key.pub
+JWT_AUTH = {
+	'JWT_PUBLIC_KEY'              : open(os.path.join(BASE_DIR, 'settings/securities/jwt_secret.key.pub')).read(),
+	'JWT_PRIVATE_KEY'             : open(os.path.join(BASE_DIR, 'settings/securities/jwt_secret.key')).read(),
+	'JWT_ALGORITHM'               : 'RS256',
+
+	'JWT_VERIFY_EXPIRATION'       : True,
+	'JWT_EXPIRATION_DELTA'        : datetime.timedelta(minutes=10),
+	'JWT_ALLOW_REFRESH'           : True,
+	'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=1),
+
+	'JWT_AUTH_HEADER_PREFIX'      : 'JWT',
+	'JWT_AUTH_COOKIE'             : 'gullin_jwt'
+}
+
+# GeoIP Path Setting
+GEOIP_PATH = os.path.join(BASE_DIR, 'utils/geoip')
