@@ -63,13 +63,16 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 			jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 			response_data = jwt_response_payload_handler(token, user, request)
-			response = Response(response_data)
+
 			if api_settings.JWT_AUTH_COOKIE:
-				expiration = (timezone.now() + api_settings.JWT_EXPIRATION_DELTA)
+				response = Response()
 				response.set_cookie(api_settings.JWT_AUTH_COOKIE,
-				                    response.data['token'],
-				                    expires=expiration,
+				                    response_data['token'],
+				                    expires=(timezone.now() + api_settings.JWT_EXPIRATION_DELTA),
 				                    httponly=True)
+			else:
+				response = Response(response_data)
+
 			return response
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -92,13 +95,15 @@ class UserAuthViewSet(viewsets.ViewSet):
 			jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 			response_data = jwt_response_payload_handler(token, user, request)
 
-			response = Response(response_data)
 			if api_settings.JWT_AUTH_COOKIE:
-				expiration = (timezone.now() + api_settings.JWT_EXPIRATION_DELTA)
+				response = Response()
 				response.set_cookie(api_settings.JWT_AUTH_COOKIE,
-				                    response.data['token'],
-				                    expires=expiration,
+				                    response_data['token'],
+				                    expires=(timezone.now() + api_settings.JWT_EXPIRATION_DELTA),
 				                    httponly=True)
+			else:
+				response = Response(response_data)
+
 			return response
 
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
