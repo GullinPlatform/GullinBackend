@@ -52,7 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 	# User Login
 	email = models.EmailField(unique=True, blank=True,
 	                          error_messages={'unique': "A user with that email already exists."})
-	phone_prefix = models.CharField(max_length=30, null=True, blank=True)
+	phone_country_code = models.CharField(max_length=30, null=True, blank=True)
 	phone = models.CharField(max_length=30, unique=True, null=True, blank=True,
 	                         error_messages={'unique': "A user with that phone already exists."})
 
@@ -61,12 +61,17 @@ class User(AbstractBaseUser, PermissionsMixin):
 	last_login_ip = models.GenericIPAddressField(null=True, blank=True)
 	TOTP_enabled = models.BooleanField(default=False)
 
+	# User Extension
+	investor = models.OneToOneField('InvestorUser', related_name='user', on_delete=models.PROTECT, null=True, blank=True)
+	analyst = models.OneToOneField('AnalystUser', related_name='user', on_delete=models.PROTECT, null=True, blank=True)
+	company_user = models.OneToOneField('CompanyUser', related_name='user', on_delete=models.PROTECT, null=True, blank=True)
+
 	# Permissions
 	is_investor = models.BooleanField(
 		default=True,
 		help_text='Designates whether this user is investor.'
 	)
-	is_company = models.BooleanField(
+	is_company_user = models.BooleanField(
 		default=False,
 		help_text='Designates whether this user is company.'
 	)
@@ -104,6 +109,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 		self.last_login = timezone.now()
 		self.save(update_fields=['last_login'])
 
+	def update_last_login_ip(self, ip):
+		if self.last_login_ip and ip != self.last_login_ip:
+			# TODO: Block User Login
+			# TODO: Send email
+			self.last_login_ip = ip
+
 	def email_user(self, subject, message, from_email=None, **kwargs):
 		"""Send an email to this user."""
 		send_mail(subject, message, from_email, [self.email], **kwargs)
@@ -127,10 +138,6 @@ class InvestorUser(models.Model):
 		(3, 'LEVEL 3'),  # ID Verified non-US Citizen or Accredited Investor
 	)
 
-	# Link to User Model
-	user = models.OneToOneField('User', related_name='investor_user', on_delete=models.PROTECT)
-
-	# User Info
 	avatar = models.ImageField(upload_to=user_avatar_dir, default='avatars/default.jpg', null=True, blank=True)
 	first_name = models.CharField(max_length=30, null=True, blank=True)
 	last_name = models.CharField(max_length=50, null=True, blank=True)
@@ -138,8 +145,8 @@ class InvestorUser(models.Model):
 
 	# Verification
 	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1)
-	id_verification = models.OneToOneField('IDVerification', related_name='investor_user', on_delete=models.PROTECT)
-	accredited_investor_verification = models.OneToOneField('InvestorVerification', related_name='investor_user', on_delete=models.PROTECT)
+	id_verification = models.OneToOneField('IDVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
+	accredited_investor_verification = models.OneToOneField('InvestorVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -162,8 +169,6 @@ class CompanyUser(models.Model):
 	Company Users are able to upload press releases, check company profile.
 	Company Users can only be added by site admins.
 	"""
-	# Link to User Model
-	user = models.OneToOneField('User', related_name='company_user', on_delete=models.PROTECT)
 
 	# Link to Company Model
 	company = models.OneToOneField('companies.Company', related_name='user', on_delete=models.PROTECT, null=True)
@@ -177,7 +182,7 @@ class CompanyUser(models.Model):
 		verbose_name_plural = 'Subusers - Company User'
 
 	def __str__(self):
-		return self.company.name
+		return self.company.name + ' Admin'
 
 
 class AnalystUser(models.Model):
@@ -190,10 +195,7 @@ class AnalystUser(models.Model):
 		(1, 'Regular')
 	)
 
-	# Link to User Model
-	user = models.OneToOneField('User', related_name='analyst_user', on_delete=models.PROTECT)
-
-	# User Info
+	# Personal Info
 	avatar = models.ImageField(upload_to=user_avatar_dir, default='avatars/default.jpg', null=True, blank=True)
 	first_name = models.CharField(max_length=30, null=True, blank=True)
 	last_name = models.CharField(max_length=50, null=True, blank=True)

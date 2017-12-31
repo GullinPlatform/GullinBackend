@@ -3,22 +3,35 @@ from rest_framework import serializers
 from .models import User, InvestorUser, CompanyUser, AnalystUser, IDVerification, InvestorVerification, VerificationCode
 
 
-class FullCompanySerializer(serializers.ModelSerializer):
+class FullUserSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = User
-		fields = ('id', 'name', 'logo', 'short_description', 'white_paper', 'website',
-		          'token_detail',
-		          'facebook', 'telegram', 'slack', 'twitter', 'medium',
+		fields = ('id', 'email', 'phone_country_code', 'phone',
+		          'last_login', 'last_login_ip', 'TOTP_enabled',
+		          'is_investor', 'is_company', 'is_analyst', 'is_active',
 		          'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
 
-	# TODO
-	def create(self, validated_data):
-		pass
 
-	# TODO
-	def update(self, instance, validated_data):
-		pass
+class CreateUserSerializer(serializers.ModelSerializer):
+	"""
+	Serializer for user sign up
+	"""
+
+	class Meta:
+		model = User
+		fields = ('id', 'email', 'password', 'last_login_ip',)
+		extra_kwargs = {'password': {'write_only': True}}
+
+	def create(self, validated_data):
+		user = User(
+			email=validated_data['email'],
+			last_login_ip=validated_data['last_login_ip']
+		)
+		user.set_password(validated_data['password'])
+		user.save()
+		user.update_last_login()
+		return user
 
 
 class FullInvestorUserSerializer(serializers.ModelSerializer):
