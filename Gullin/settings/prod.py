@@ -28,10 +28,14 @@ INSTALLED_APPS = [
 	'django.contrib.sessions',
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
+	# installed packages
+	'djcelery_email',
+	# customized utils
+	'Gullin.utils.rest_framework_jwt',
+	# modules
 	'Gullin.modules.users',
 	'Gullin.modules.companies',
 	'Gullin.modules.wallets',
-	'Gullin.utils.rest_framework_jwt'
 ]
 
 MIDDLEWARE = [
@@ -50,7 +54,7 @@ AUTH_USER_MODEL = 'users.User'
 TEMPLATES = [
 	{
 		'BACKEND' : 'django.template.backends.django.DjangoTemplates',
-		'DIRS'    : [],
+		'DIRS'    : [os.path.join(BASE_DIR, 'templates')],
 		'APP_DIRS': True,
 		'OPTIONS' : {
 			'context_processors': [
@@ -64,6 +68,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Gullin.wsgi.application'
+
+# Async Email Sending Backend
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+CELERY_EMAIL_TASK_CONFIG = {
+	'name'         : 'djcelery_email_send',
+	'ignore_result': True,
+	'queue'        : 'email',
+	'rate_limit'   : '50/m',
+}
+EMAIL_SEND_FROM = 'noreply@gullin.io'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -120,7 +134,7 @@ JWT_AUTH = {
 	'JWT_ALGORITHM'               : 'RS256',
 
 	'JWT_VERIFY_EXPIRATION'       : True,
-	'JWT_EXPIRATION_DELTA'        : datetime.timedelta(minutes=10),
+	'JWT_EXPIRATION_DELTA'        : datetime.timedelta(seconds=300),
 	'JWT_ALLOW_REFRESH'           : True,
 	'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=1),
 
