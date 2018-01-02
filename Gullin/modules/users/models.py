@@ -1,6 +1,10 @@
-from django.db import models
-from django.core.mail import send_mail
+import random
+import string
 from datetime import timedelta
+
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
@@ -115,15 +119,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 			# TODO: Send email
 			self.last_login_ip = ip
 
-	def email_user(self, subject, message, from_email=None, **kwargs):
-		"""Send an email to this user."""
-		send_mail(subject, message, from_email, [self.email], **kwargs)
-
-	def sms_user(self, subject, message, from_email=None, **kwargs):
-		"""Send an sms message to this user."""
-		# TODO
-		pass
-
 
 class InvestorUser(models.Model):
 	"""
@@ -227,10 +222,17 @@ class IDVerification(models.Model):
 	ID_TYPE_CHOICES = (('Driver License', 'Driver License'),
 	                   ('Photo ID', 'Photo ID'),
 	                   ('Passport', 'Passport'))
-
+	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
 	official_id = models.FileField(upload_to=official_id_dir, null=True, blank=True)
 	nationality = models.CharField(max_length=20, null=True, blank=True)
+
+	# Identifier
+	is_verified = models.BooleanField(default=False)
+
+	# TimeStamp
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
 
 	class Meta:
 		verbose_name = 'ID Verification'
@@ -238,6 +240,36 @@ class IDVerification(models.Model):
 
 	def __str__(self):
 		return self.official_id_type
+
+	def verify_identity(self):
+		# cache
+		investor = self.investor_user
+		# update verification status
+		self.is_verified = True
+		# sync nationality (this is for users who use different country phone number when register,
+		# when we manually check user identity, we have to update user nationality on the admin portal and sync with investor user model)
+		investor.nationality = self.nationality
+		# update user verification level
+		if self.nationality == 'United States':
+			investor.verification_level = 2
+		else:
+			investor.verification_level = 3
+		# save
+		self.save()
+		investor.save()
+		# TODO: send email to user for the status updating
+
+	def unverify_identity(self):
+		# cache
+		investor = self.investor_user
+		# update verification status
+		self.is_verified = True
+		# update user verification level
+		investor.verification_level = 1
+		# save
+		self.save()
+		investor.save()
+		# TODO: send email to user for the status updating
 
 
 class InvestorVerification(models.Model):
@@ -270,8 +302,24 @@ class VerificationCode(models.Model):
 
 	user = models.OneToOneField('User', related_name='verification_code', on_delete=models.PROTECT)
 	code = models.CharField(max_length=200)
-	expire_time = models.DateTimeField(auto_now_add=True)
+	expire_time = models.DateTimeField(default=timezone.now())
 
 	@property
 	def is_expired(self):
-		return (timezone.now() - timedelta(hours=1)) > self.expire_time
+		return timezone.now() > self.expire_time
+
+	def expire(self):
+		self.expire_time = timezone.now()
+		self.save()
+
+	def refresh(self):
+		self.code = ''.join([random.choice(string.digits) for n in range(6)])
+		self.expire_time = timezone.now() + timedelta(minutes=5)
+		self.save()
+
+
+# Signal handling function to add VerificationCode to every new created User instance
+@receiver(post_save, sender=User)
+def add_verification_code_to_user(sender, **kwargs):
+	if kwargs.get('created', True):
+		VerificationCode.objects.create(user=kwargs.get('instance'))

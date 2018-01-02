@@ -106,7 +106,6 @@ class AnalystUserAdmin(admin.ModelAdmin):
 
 @admin.register(CompanyUser)
 class CompanyUserAdmin(admin.ModelAdmin):
-	# TODO: add company
 	# List display Settings
 	list_display = ('id', 'user', 'created', 'updated',)
 	search_fields = ('user',)
