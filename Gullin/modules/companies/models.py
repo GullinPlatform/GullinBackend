@@ -1,6 +1,4 @@
 from django.db import models
-from datetime import timedelta
-from django.utils import timezone
 
 from Gullin.utils.upload_dir import company_icon_dir, company_member_avatar_dir
 
@@ -13,16 +11,17 @@ class Company(models.Model):
 	# Company Info
 	name = models.CharField(max_length=50, unique=True)
 	logo = models.ImageField(upload_to=company_icon_dir, null=True)
+	display_img = models.ImageField(upload_to=company_icon_dir, null=True)
 	short_description = models.CharField(max_length=150)
 	white_paper = models.URLField(max_length=150)
 	website = models.URLField(max_length=150)
 
+	# Project Description
+
 	# Token Detail
-	token_detail = models.OneToOneField('TokenDetail', null=True, on_delete=models.PROTECT)
+	token_detail = models.OneToOneField('TokenDetail', null=True, on_delete=models.PROTECT, related_name='company')
 
 	# Press Releases
-
-	# Project Description
 
 	# Token Sale Plan
 
@@ -45,7 +44,7 @@ class Company(models.Model):
 		verbose_name = 'Company'
 		verbose_name_plural = 'Companies'
 
-	def __unicode__(self):
+	def __str__(self):
 		return self.name
 
 
@@ -54,10 +53,6 @@ class TokenDetail(models.Model):
 	TokenDetail Model
 	Token Detail stores all token sake (ICO) info
 	"""
-	TOKEN_TYPE_CHOICES = (
-		(0, 'Trading Token'),
-		(1, 'Security ICO'),
-	)
 	ICO_TOKEN_TYPE_CHOICES = (
 		(0, 'Security'),
 		(1, 'Utility'),
@@ -68,37 +63,41 @@ class TokenDetail(models.Model):
 	)
 
 	# Token Detail
-	logo = models.ImageField(upload_to=company_icon_dir, null=True)
-	code = models.CharField(max_length=10)
-	is_finished = models.BooleanField(default=False)
+	token_code = models.CharField(max_length=10)
+	token_name = models.CharField(max_length=140)
+	token_logo = models.ImageField(upload_to=company_icon_dir, null=True, blank=True)
+	erc20_compliant = models.BooleanField(default=True)
 
 	# ICO Time
-	start_datetime = models.DateTimeField()
-	end_datetime = models.DateTimeField()
+	start_datetime = models.DateTimeField(null=True, blank=True)
+	end_datetime = models.DateTimeField(null=True, blank=True)
+	is_finished = models.BooleanField(default=False)
 
 	# ICO Type
-	ico_token_type = models.IntegerField(choices=ICO_TOKEN_TYPE_CHOICES)
-	ico_stage_type = models.IntegerField(choices=ICO_STAGE_TYPE_CHOICES)
+	ico_token_type = models.IntegerField(choices=ICO_TOKEN_TYPE_CHOICES, null=True, blank=True)
+	ico_stage_type = models.IntegerField(choices=ICO_STAGE_TYPE_CHOICES, null=True, blank=True)
 
 	# Tokenomics
-	init_price = models.FloatField()
-	current_price = models.FloatField()
-	total_token_supply = models.IntegerField()
-	token_sold = models.FloatField()
+	threshold = models.FloatField(null=True, blank=True)
 
-	soft_market_cap = models.FloatField()
-	hard_market_cap = models.FloatField()
-	market_cap_unit = models.CharField(max_length=10)
+	init_price = models.FloatField(null=True, blank=True)
+	current_price = models.FloatField(null=True, blank=True)
+	total_token_supply = models.IntegerField(null=True, blank=True)
+	token_sold = models.FloatField(null=True, blank=True)
 
-	# Wallet Address
-	wallet_address = models.CharField(max_length=200)
+	soft_market_cap = models.FloatField(null=True, blank=True)
+	hard_market_cap = models.FloatField(null=True, blank=True)
+	market_cap_unit = models.CharField(max_length=10, null=True, blank=True)
+
+	# Contract Address
+	contract_address = models.CharField(max_length=200, null=True, blank=True)
 
 	# Timestamp
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 
 	def __str__(self):
-		return self.code
+		return self.token_code
 
 	def ico_percentage(self):
 		return float(self.token_sold / self.total_token_supply) * 100
@@ -147,8 +146,8 @@ class CompanyMember(models.Model):
 	member_type = models.IntegerField(default=1, choices=MEMBER_TYPE_CHOICES)
 
 	# Social Media
-	facebook = models.URLField()
-	linkedin = models.URLField()
+	facebook = models.URLField(null=True, blank=True)
+	linkedin = models.URLField(null=True, blank=True)
 
 	# Timestamp
 	created = models.DateTimeField(auto_now_add=True)
