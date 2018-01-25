@@ -17,8 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 
 from Gullin.modules.users import urls as user_urls
+from Gullin.modules.companies import urls as company_urls
+from Gullin.modules.wallets import urls as wallet_urls
 
 urlpatterns = [
 	path('admin/', admin.site.urls),
-	path('user/', include(user_urls))
+	path('user/', include(user_urls)),
+	path('company/', include(company_urls)),
+	path('wallet/', include(wallet_urls)),
 ]
