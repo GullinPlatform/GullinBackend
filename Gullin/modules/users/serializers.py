@@ -4,13 +4,28 @@ from .models import User, InvestorUser, CompanyUser, AnalystUser, IDVerification
 
 
 class FullUserSerializer(serializers.ModelSerializer):
+	"""
+	Full Serializer for User
+	"""
+
 	class Meta:
 		model = User
 		fields = ('id', 'email', 'phone_country_code', 'phone',
 		          'last_login', 'last_login_ip', 'TOTP_enabled',
-		          'is_investor', 'is_company', 'is_analyst', 'is_active',
+		          'is_investor', 'is_company_user', 'is_analyst', 'is_active',
 		          'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
+
+
+class BasicUserSerializer(serializers.ModelSerializer):
+	"""
+	Basic Serializer to build nested json feed for InvestorUser, CompanyUser and AnalystUser
+	"""
+
+	class Meta:
+		model = User
+		fields = ('id', 'email', 'phone_country_code', 'phone', 'TOTP_enabled',
+		          'is_investor', 'is_company_user', 'is_analyst')
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -31,10 +46,16 @@ class CreateUserSerializer(serializers.ModelSerializer):
 		user.set_password(validated_data['password'])
 		user.save()
 		user.update_last_login()
+
 		return user
 
 
 class FullInvestorUserSerializer(serializers.ModelSerializer):
+	"""
+	Full Serializer for InvestorUser
+	"""
+	user = BasicUserSerializer()
+
 	class Meta:
 		model = InvestorUser
 		fields = ('user',
@@ -66,8 +87,8 @@ class FullAnalystUserSerializer(serializers.ModelSerializer):
 class FullIDVerificationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = IDVerification
-		fields = ('official_id_type', 'official_id', 'nationality')
-		read_only_fields = ('official_id_type', 'official_id',)
+		fields = ('official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'created', 'updated',)
+		read_only_fields = ('created', 'updated',)
 
 
 class FullInvestorVerificationSerializer(serializers.ModelSerializer):

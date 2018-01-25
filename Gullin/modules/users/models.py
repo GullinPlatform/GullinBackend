@@ -10,6 +10,7 @@ from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from Gullin.utils.upload_dir import user_avatar_dir, official_id_dir
+from Gullin.utils.send.sms import send_sms
 
 from django.utils import timezone
 
@@ -119,6 +120,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 			# TODO: Send email
 			self.last_login_ip = ip
 
+	def send_sms(self):
+		send_sms(self.phone_country_code + self.phone, 'Test Msg')
+
 
 class InvestorUser(models.Model):
 	"""
@@ -156,7 +160,7 @@ class InvestorUser(models.Model):
 
 	@property
 	def full_name(self):
-		return self.first_name + ' ' + self.last_name
+		return '{0} {1}'.format(self.first_name, self.last_name)
 
 
 class CompanyUser(models.Model):
@@ -224,7 +228,9 @@ class IDVerification(models.Model):
 	                   ('Passport', 'Passport'))
 	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
-	official_id = models.FileField(upload_to=official_id_dir, null=True, blank=True)
+	official_id_front = models.FileField(upload_to=official_id_dir, null=True, blank=True)
+	official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True)
+
 	nationality = models.CharField(max_length=20, null=True, blank=True)
 
 	# Identifier
@@ -257,7 +263,8 @@ class IDVerification(models.Model):
 		# save
 		self.save()
 		investor.save()
-		# TODO: send email to user for the status updating
+
+	# TODO: send email to user for the status updating
 
 	def unverify_identity(self):
 		# cache
@@ -269,7 +276,7 @@ class IDVerification(models.Model):
 		# save
 		self.save()
 		investor.save()
-		# TODO: send email to user for the status updating
+	# TODO: send email to user for the status updating
 
 
 class InvestorVerification(models.Model):
@@ -302,7 +309,7 @@ class VerificationCode(models.Model):
 
 	user = models.OneToOneField('User', related_name='verification_code', on_delete=models.PROTECT)
 	code = models.CharField(max_length=200)
-	expire_time = models.DateTimeField(default=timezone.now())
+	expire_time = models.DateTimeField(default='django.utils.timezone.now')
 
 	@property
 	def is_expired(self):

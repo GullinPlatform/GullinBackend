@@ -60,6 +60,7 @@ class UserAdmin(BaseUserAdmin):
 		else:
 			return '-'
 
+
 @admin.register(InvestorUser)
 class InvestorUserAdmin(admin.ModelAdmin):
 	# List display Settings
@@ -75,7 +76,7 @@ class InvestorUserAdmin(admin.ModelAdmin):
 		('Verification', {'fields': ('verification_level', 'id_verification', 'accredited_investor_verification',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
-	readonly_fields = ('created', 'updated', 'verification_level', 'edit_user')
+	readonly_fields = ('created', 'updated', 'edit_user')
 
 	def edit_user(self, obj):
 		change_url = reverse('admin:users_user_change', args=(obj.user.id,))

@@ -11,10 +11,11 @@ from Gullin.utils.rest_framework_jwt.utils import jwt_return_auth_token
 
 from Gullin.utils.get_client_ip import get_client_ip
 from Gullin.utils.validate_country_code import is_valid_country, get_code_by_country_name
-from Gullin.utils.send_email import send_email
+from Gullin.utils.send.email import send_email
+from Gullin.utils.send.sms import send_sms
 
-from .serializers import CreateUserSerializer
-from .models import User, InvestorUser
+from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer
+from .models import InvestorUser
 from ..wallets.models import Wallet
 
 
@@ -38,14 +39,16 @@ class UserAuthViewSet(viewsets.ViewSet):
 		# All User created through this method is investor,
 		# so we should create a InvestorUser instance and bind to new created User
 		investor = InvestorUser.objects.create(first_name=request.data.get('first_name'),
-		                                       last_name=request.data.get('last_time'))
+		                                       last_name=request.data.get('last_name'))
 		user.investor = investor
 		user.save()
 
 		# All InvestorUser has a insite wallet,
 		# so we should create a Wallet instance and bind to new created InvestorUser
 		# IMPORTANT: since the public/private key pair is generated on the frontend, it will be stored to database later
-		Wallet.objects.create(investor_user=investor)
+		wallet = Wallet.objects.create(investor_user=investor)
+		# Init Balance objects and add to wallet
+		wallet.init_balance()
 
 		# Send user verification email when user register
 		verification_code = user.verification_code
@@ -65,6 +68,7 @@ class UserAuthViewSet(viewsets.ViewSet):
 		if serializer.is_valid():
 			user = serializer.object.get('user') or request.user
 			token = serializer.object.get('token')
+			# TODO: 2 factor auth need to be implemented
 
 			# Update user last login timestamp
 			user.update_last_login()
@@ -85,7 +89,8 @@ class UserAuthViewSet(viewsets.ViewSet):
 				response = Response(response_data)
 
 			return response
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+		else:
+			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 	def log_out(self, request):
 		response = Response()
@@ -121,6 +126,9 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 
 class UserSignUpFollowUpViewSet(viewsets.ViewSet):
+	"""
+	The viewset for user sign up follow-up, includes phone verification, email verification and id uploading
+	"""
 	parser_classes = (MultiPartParser, FormParser, JSONParser)
 	permission_classes = (IsAuthenticated,)
 
@@ -161,11 +169,11 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 				investor_user.nationality = country_name
 				investor_user.investor.save()
 
-				# TODO: Send SMS to user
+				# Send SMS to user
 				verification_code.refresh()
 				phone_num = user.phone_country_code + user.phone
-				msg = 'Gullin Verification Code: ' + verification_code.code + '\n Valid in 5 minutes.'
-				# TODO: Perform SMS sending here
+				msg = 'Verification Code: ' + verification_code.code + '\n Valid in 5 minutes.'
+				send_sms(phone_num, msg)
 
 				return Response(status=status.HTTP_200_OK)
 			else:
@@ -202,11 +210,12 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 
 		elif request.data.get('sms'):
 			verification_code = request.user.verification_code
-			# TODO: Send SMS to user
 			verification_code.refresh()
+
 			phone_num = request.user.phone_country_code + request.user.phone
 			msg = 'Gullin Verification Code: ' + verification_code.code + '\n Valid in 5 minutes.'
-			# TODO: Perform SMS sending here
+			send_sms(phone_num, msg)
+
 			return Response(status=status.HTTP_200_OK)
 
 	def save_wallet_address(self, request):
@@ -219,8 +228,37 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def upload_id(self, request):
-		pass
+		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality'
+		serializer = FullIDVerificationSerializer(data=request.data)
+		if serializer.is_valid():
+			id_verification = serializer.save()
+			request.user.investor.id_verification = id_verification
+			request.user.investor.save()
+
+			return Response(status=status.HTTP_201_CREATED)
+		else:
+			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ViewSet):
-	pass
+	parser_classes = (MultiPartParser, FormParser, JSONParser)
+	permission_classes = (IsAuthenticated,)
+
+	def me(self, request):
+		if request.method == 'GET':
+			# Retrieve self
+			if request.user.is_investor:
+				serializer = FullInvestorUserSerializer(request.user.investor)
+			elif request.user.is_company_user:
+				# TODO
+				pass
+			elif request.user.is_analyst:
+				# TODO
+				pass
+			return Response(serializer.data)
+		elif request.method == 'PATCH':
+			# Update self
+			pass
+
+	def accredited_investor_verification(self, request):
+		pass
