@@ -27,3 +27,11 @@ DATABASES = {
 		'NAME'  : os.path.join(BASE_DIR, 'tmp.sqlite3'),
 	}
 }
+
+# CORS Settings
+CORS_ORIGIN_WHITELIST = (
+	'localhost:4000',
+	'127.0.0.1:4000',
+	'localhost:4004',
+	'127.0.0.1:4004'
+)

@@ -30,6 +30,7 @@ INSTALLED_APPS = [
 	'django.contrib.staticfiles',
 	# installed packages
 	'djcelery_email',
+	'corsheaders',
 	# customized utils
 	'Gullin.utils.rest_framework_jwt',
 	# modules
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
 	'django.middleware.security.SecurityMiddleware',
 	'django.contrib.sessions.middleware.SessionMiddleware',
+	'corsheaders.middleware.CorsMiddleware',
 	'django.middleware.common.CommonMiddleware',
 	'django.middleware.csrf.CsrfViewMiddleware',
 	'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -68,16 +70,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'Gullin.wsgi.application'
-
-# Async Email Sending Backend
-EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
-CELERY_EMAIL_TASK_CONFIG = {
-	'name'         : 'djcelery_email_send',
-	'ignore_result': True,
-	'queue'        : 'email',
-	'rate_limit'   : '50/m',
-}
-EMAIL_SEND_FROM = 'noreply@gullin.io'
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
@@ -119,9 +111,17 @@ APPEND_SLASH = False
 
 # Django Rest Framework Settings
 REST_FRAMEWORK = {
-	'DEFAULT_PERMISSION_CLASSES': (
+	'DEFAULT_PERMISSION_CLASSES'    : (
 		'rest_framework.permissions.IsAuthenticatedOrReadOnly',
-	)
+	),
+	'DEFAULT_AUTHENTICATION_CLASSES': (
+		'Gullin.utils.rest_framework_jwt.authentication.BaseJSONWebTokenAuthentication',
+	),
+	'DEFAULT_RENDERER_CLASSES'      : (
+		'rest_framework.renderers.JSONRenderer',
+	),
+	'DEFAULT_PAGINATION_CLASS'      : 'rest_framework.pagination.LimitOffsetPagination',
+	'PAGE_SIZE'                     : 100,
 }
 
 # Json Web Token Settings
@@ -144,3 +144,59 @@ JWT_AUTH = {
 
 # GeoIP Path Setting
 GEOIP_PATH = os.path.join(BASE_DIR, 'utils/geoip')
+
+# CORS Settings
+CORS_ORIGIN_WHITELIST = (
+	'http://app.gullin.io',
+	'https://app.gullin.io',
+)
+
+CORS_ALLOW_HEADERS = (
+	'accept',
+	'accept-encoding',
+	'authorization',
+	'content-type',
+	'origin',
+	'user-agent',
+	'x-csrftoken',
+	'x-requested-with',
+	'cache-control',
+	'HTTP_X_XSRF_TOKEN',
+	'X-CSRF-TOKEN',
+	'XMLHttpRequest',
+	'Access-Control-Allow-Origin',
+	'Access-Control-Allow-Methods',
+	'Access-Control-Allow-Headers',
+	'Access-Control-Allow-Credentials',
+	'Access-Control-Max-Age'
+)
+
+CORS_PREFLIGHT_MAX_AGE = 86400
+CORS_ALLOW_CREDENTIALS = True
+
+# AWS Credentials
+AWS_ACCESS_KEY_ID = open(os.path.join(BASE_DIR, 'settings/securities/aws_secret_key')).read().splitlines()[0]
+AWS_SECRET_ACCESS_KEY = open(os.path.join(BASE_DIR, 'settings/securities/aws_secret_key')).read().splitlines()[1]
+
+# AWS S3 Storage
+AWS_S3_HOST = 's3.us-east-1.amazonaws.com'
+AWS_STORAGE_BUCKET_NAME = 'gullin-storage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# AWS SES Email Service
+AWS_SES_REGION_NAME = 'us-east-1'
+EMAIL_BACKEND = 'Gullin.utils.send.email.SESBackend'
+EMAIL_SEND_FROM = 'Gullin <no-reply@gullin.io>'
+# Async Email Sending Backend
+# TODO
+# EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+# CELERY_EMAIL_BACKEND = 'Gullin.utils.send.email.SESBackend'
+# CELERY_EMAIL_TASK_CONFIG = {
+# 	'name'         : 'djcelery_email_send',
+# 	'ignore_result': True,
+# 	'queue'        : 'email',
+# 	'rate_limit'   : '100/m',
+# }
+
+# AWS SNS Message Service
+AWS_SNS_REGION_NAME = 'us-east-1'
