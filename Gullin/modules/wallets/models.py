@@ -31,11 +31,11 @@ class Wallet(models.Model):
 	investor_user = models.OneToOneField('users.InvestorUser', related_name='wallet', on_delete=models.PROTECT)
 
 	# Wallet address
-	eth_address = models.CharField(max_length=100, null=True)
+	eth_address = models.CharField(max_length=100, null=True, blank=True)
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
-	updated = models.DateTimeField(auto_now=True)
+	created_eth_block_num = models.IntegerField(default=5000000)
 
 	def __str__(self):
 		return self.investor_user.full_name + ' wallet'
@@ -77,6 +77,7 @@ class Transaction(models.Model):
 
 	amount = models.FloatField()
 	token_code = models.CharField(max_length=10)
+	transaction_hash = models.CharField(max_length=100, null=True, blank=True)
 
 	def __str__(self):
 		return 'transaction of' + str(self.user)

@@ -9,8 +9,7 @@ class WalletBalanceSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Balance
-		fields = ('wallet',
-		          'token', 'balance', 'updated')
+		fields = ('token', 'balance', 'updated')
 
 
 class FullWalletSerializer(serializers.ModelSerializer):
@@ -18,17 +17,17 @@ class FullWalletSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Wallet
-		fields = ('investor_user',
-		          'eth_address',
-		          'created', 'updated')
-		read_only_fields = ('eth_address', 'created', 'updated')
+		fields = ('eth_address',
+		          'balances',
+		          'created')
+		read_only_fields = ('eth_address', 'created', 'balances')
 
 
 class FullTransactionSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Transaction
 		fields = ('user',
-		          'type', 'datetime',
+		          'type', 'datetime', 'transaction_hash',
 		          'from_address', 'from_address_type', 'from_address_note',
 		          'to_address', 'to_address_type', 'to_address_note',
 		          'amount', 'token_code',)

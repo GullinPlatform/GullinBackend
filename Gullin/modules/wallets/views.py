@@ -13,21 +13,23 @@ class WalletViewSet(viewsets.ViewSet):
 	parser_classes = (FormParser, JSONParser)
 	permission_classes = (IsAuthenticated,)
 
+	def wallet(self, request):
+		"""
+		Retrieve user wallet balance info
+		"""
+		# Get the cached balance info from database
+		serializer = FullWalletSerializer(request.user.investor.wallet)
+		return Response(serializer.data)
+
 	def balance(self, request):
 		"""
-		Retrieve/Record user wallet balance info
+		Update user wallet balance info
 		"""
-		if request.method == 'GET':
-			# Get the cached balance info from database
-			serializer = FullWalletSerializer(request.user.investor.wallet)
-			return Response(serializer.data)
-		elif request.method == 'POST':
-			#
-			if request.data.get('new_balance'):
-				for token_code, balance in request.data.get('new_balance').items():
-					wallet_balances = request.user.investor.wallet.balances.all()
-					wallet_balances.get(token__token_code=token_code).balance = balance
-			return Response(status=status.HTTP_200_OK)
+		if request.data.get('new_balance'):
+			for token_code, balance in request.data.get('new_balance').items():
+				wallet_balances = request.user.investor.wallet.balances.all()
+				wallet_balances.get(token__token_code=token_code).balance = balance
+		return Response(status=status.HTTP_200_OK)
 
 	def transaction(self, request):
 		"""
@@ -39,5 +41,4 @@ class WalletViewSet(viewsets.ViewSet):
 		elif request.method == 'POST':
 			serializer = FullTransactionSerializer(data=request.data)
 			serializer.is_valid(raise_exception=True)
-
 			return Response(serializer.data, status=status.HTTP_201_CREATED)

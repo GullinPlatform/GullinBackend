@@ -2,16 +2,21 @@ from django.urls import path
 
 from .views import WalletViewSet
 
-company_list = WalletViewSet.as_view({
-	'get': 'list',
+wallet_retrieve = WalletViewSet.as_view({
+	'get': 'wallet',
 })
 
-company_detail = WalletViewSet.as_view({
-	'get': 'detail',
+wallet_balance = WalletViewSet.as_view({
+	'post': 'balance',
 })
 
+wallet_transaction = WalletViewSet.as_view({
+	'get' : 'transaction',
+	'post': 'transaction',
+})
 
 urlpatterns = [
-	path('list/<list_type>/', company_list, name='company_list'),
-	path('<int:id>/', company_detail, name='company_detail'),
+	path('', wallet_retrieve, name='wallet_retrieve'),
+	path('balance/', wallet_balance, name='wallet_balance'),
+	path('transaction/', wallet_transaction, name='wallet_transaction'),
 ]

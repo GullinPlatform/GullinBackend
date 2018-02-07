@@ -20,16 +20,17 @@ class BalanceInline(admin.TabularInline):
 @admin.register(Wallet)
 class WalletAdmin(admin.ModelAdmin):
 	# List display Settings
-	list_display = ('id', 'investor_user', 'created', 'updated',)
+	list_display = ('id', 'investor_user', 'created',)
 	search_fields = ('investor_user',)
 	ordering = ('created',)
 
 	# Detail Page Settings
 	fieldsets = (
 		('Wallet Info', {'fields': ('id', 'investor_user_detail', 'eth_address',)}),
-		('Timestamp', {'fields': ('created', 'updated',)}),
+		('Timestamp', {'fields': ('created', 'created_eth_block_num')}),
 	)
-	readonly_fields = ('id', 'created', 'updated', 'investor_user_detail', 'eth_address',)
+	readonly_fields = ('id', 'created', 'created_eth_block_num', 'investor_user_detail', 'eth_address',)
+
 	inlines = [BalanceInline, ]
 
 	def investor_user_detail(self, obj):
