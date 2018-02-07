@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Company, TokenDetail, PressRelease, CompanyMember
+from .models import Company, TokenDetail, PressRelease, CompanyMember, Document
 
 
 class FullTokenDetailSerializer(serializers.ModelSerializer):
@@ -9,8 +9,9 @@ class FullTokenDetailSerializer(serializers.ModelSerializer):
 		fields = ('token_code', 'token_logo', 'erc20_compliant',
 		          'start_datetime', 'end_datetime', 'is_finished',
 		          'ico_token_type', 'ico_stage_type',
-		          'threshold', 'init_price', 'current_price', 'total_token_supply', 'token_sold', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit',
-		          'contract_address',
+		          'price', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution',
+		          'threshold', 'restrictions', 'bonus',
+		          'crowd_sale_contract_address', 'token_address', 'decimals',
 		          'created', 'updated',)
 		read_only_fields = ('contract_address', 'created', 'updated',)
 
@@ -18,33 +19,53 @@ class FullTokenDetailSerializer(serializers.ModelSerializer):
 class MiniTokenDetailSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TokenDetail
-		fields = ('is_finished', 'start_datetime', 'end_datetime')
+		fields = ('is_finished', 'start_datetime', 'end_datetime',)
 
 
 class BalanceTokenDetailSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TokenDetail
-		fields = ('token_code', 'token_name', 'token_logo', 'contract_address')
+		fields = ('token_code', 'token_name', 'token_logo', 'token_address', 'decimals',)
+
+
+class FullPressReleaseSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = PressRelease
+		fields = ('title', 'brief', 'url',
+		          'created',)
+		read_only_fields = ('created',)
+
+
+class FullDocumentSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Document
+		fields = ('title', 'url',
+		          'created',)
+		read_only_fields = ('created',)
 
 
 class FullCompanyMemberSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = CompanyMember
 		fields = ('company',
-		          'avatar', 'first_name', 'last_name',
-		          'title', 'description', 'member_type', 'facebook', 'linkedin',
-		          'created', 'updated')
-		read_only_fields = ('created', 'updated',)
+		          'avatar', 'full_name',
+		          'title', 'description', 'member_type',
+		          'facebook', 'linkedin', 'website',
+		          'created', 'updated',)
+		read_only_fields = ('created', 'updated', 'full_name',)
 
 
 class FullCompanySerializer(serializers.ModelSerializer):
 	token_detail = FullTokenDetailSerializer()
 	members = FullCompanyMemberSerializer(many=True)
+	documents = FullDocumentSerializer(many=True)
+	press_releases = FullPressReleaseSerializer(many=True)
 
 	class Meta:
 		model = Company
 		fields = ('id', 'name', 'logo', 'short_description', 'white_paper', 'website',
-		          'token_detail',
+		          'description',
+		          'token_detail', 'members', 'documents', 'press_releases',
 		          'facebook', 'telegram', 'slack', 'twitter', 'medium',
 		          'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
@@ -55,13 +76,4 @@ class ListCompanySerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Company
-		fields = ('id', 'name', 'token_detail', 'display_img', 'short_description')
-
-
-class FullPressReleaseSerializer(serializers.ModelSerializer):
-	class Meta:
-		model = PressRelease
-		fields = ('company',
-		          'title', 'content', 'url',
-		          'created', 'updated')
-		read_only_fields = ('created', 'updated',)
+		fields = ('id', 'name', 'token_detail', 'display_img', 'short_description',)

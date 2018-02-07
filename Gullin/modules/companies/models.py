@@ -17,17 +17,14 @@ class Company(models.Model):
 	website = models.URLField(max_length=150)
 
 	# Project Description
+	description = models.TextField(null=True)
 
 	# Token Detail
 	token_detail = models.OneToOneField('TokenDetail', null=True, on_delete=models.PROTECT, related_name='company')
 
+	# Team Members
+	# Documents
 	# Press Releases
-
-	# Token Sale Plan
-
-	# Legal Framework
-
-	# Analysts
 
 	# Social Media
 	facebook = models.URLField(max_length=150)
@@ -78,19 +75,24 @@ class TokenDetail(models.Model):
 	ico_stage_type = models.IntegerField(choices=ICO_STAGE_TYPE_CHOICES, null=True, blank=True)
 
 	# Tokenomics
-	threshold = models.FloatField(null=True, blank=True)
-
-	init_price = models.FloatField(null=True, blank=True)
-	current_price = models.FloatField(null=True, blank=True)
+	price = models.FloatField(null=True, blank=True)
 	total_token_supply = models.IntegerField(null=True, blank=True)
-	token_sold = models.FloatField(null=True, blank=True)
 
 	soft_market_cap = models.FloatField(null=True, blank=True)
 	hard_market_cap = models.FloatField(null=True, blank=True)
 	market_cap_unit = models.CharField(max_length=10, null=True, blank=True)
 
-	# Contract Address
-	contract_address = models.CharField(max_length=200, null=True, blank=True)
+	token_distribution = models.TextField(null=True, blank=True)
+
+	# Investment Info
+	threshold = models.FloatField(null=True, blank=True)
+	restrictions = models.TextField(null=True, blank=True)
+	bonus = models.TextField(null=True, blank=True)
+
+	# Smart Contract Info
+	crowd_sale_contract_address = models.CharField(max_length=200, null=True, blank=True)
+	token_address = models.CharField(max_length=200, null=True, blank=True)
+	decimals = models.IntegerField(null=True, blank=True)
 
 	# Timestamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -99,8 +101,9 @@ class TokenDetail(models.Model):
 	def __str__(self):
 		return self.token_code
 
-	def ico_percentage(self):
-		return float(self.token_sold / self.total_token_supply) * 100
+
+# def ico_percentage(self):
+# 	return float(self.token_sold / self.total_token_supply) * 100
 
 
 class PressRelease(models.Model):
@@ -113,12 +116,11 @@ class PressRelease(models.Model):
 
 	# content
 	title = models.CharField(max_length=200)
-	content = models.TextField(null=True, blank=True)
+	brief = models.CharField(max_length=200, null=True, blank=True)
 	url = models.URLField(null=True, blank=True)
 
 	# Timestamp
 	created = models.DateTimeField(auto_now_add=True)
-	updated = models.DateTimeField(auto_now=True)
 
 	def __str__(self):
 		return self.company.name + ' ' + self.title
@@ -148,6 +150,7 @@ class CompanyMember(models.Model):
 	# Social Media
 	facebook = models.URLField(null=True, blank=True)
 	linkedin = models.URLField(null=True, blank=True)
+	website = models.URLField(null=True, blank=True)
 
 	# Timestamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -159,3 +162,18 @@ class CompanyMember(models.Model):
 	@property
 	def full_name(self):
 		return self.first_name + ' ' + self.last_name
+
+
+class Document(models.Model):
+	# Company
+	company = models.ForeignKey('Company', related_name='documents', on_delete=models.PROTECT)
+
+	# PressRelease
+	title = models.CharField(max_length=200, null=True, blank=True)
+	url = models.URLField(null=True, blank=True)
+
+	# Timestamp
+	created = models.DateTimeField(auto_now_add=True)
+
+	def __str__(self):
+		return self.company.name + ' ' + self.title
