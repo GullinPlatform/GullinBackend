@@ -10,7 +10,6 @@ from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from Gullin.utils.upload_dir import user_avatar_dir, official_id_dir
-from Gullin.utils.send.sms import send_sms
 
 from django.utils import timezone
 
@@ -58,11 +57,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 	email = models.EmailField(unique=True, blank=True,
 	                          error_messages={'unique': "A user with that email already exists."})
 	phone_country_code = models.CharField(max_length=30, null=True, blank=True)
-	phone = models.CharField(max_length=30, unique=True, null=True, blank=True,
-	                         error_messages={'unique': "A user with that phone already exists."})
+	phone = models.CharField(max_length=30, unique=True, null=True, blank=True)
 
 	# Security
-	last_login = models.DateTimeField(auto_now_add=True)
+	last_login = models.DateTimeField(default=timezone.now)
 	last_login_ip = models.GenericIPAddressField(null=True, blank=True)
 	TOTP_enabled = models.BooleanField(default=False)
 
@@ -106,6 +104,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 		verbose_name = 'Base User'
 		verbose_name_plural = 'Base Users'
 		ordering = ['-created']
+		unique_together = ('phone_country_code', 'phone')
 
 	def __str__(self):
 		return self.email
@@ -120,9 +119,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 			# TODO: Send email
 			self.last_login_ip = ip
 
-	def send_sms(self):
-		send_sms(self.phone_country_code + self.phone, 'Test Msg')
-
 
 class InvestorUser(models.Model):
 	"""
@@ -133,8 +129,9 @@ class InvestorUser(models.Model):
 		(-1, 'Not Verified'),  # Not Verified
 		(0, 'LEVEL 0'),  # Email Verified
 		(1, 'LEVEL 1'),  # Phone Verified
-		(2, 'LEVEL 2'),  # ID Verified US Citizen
-		(3, 'LEVEL 3'),  # ID Verified non-US Citizen or Accredited Investor
+		(2, 'LEVEL 2'),  # ID Uploaded
+		(3, 'LEVEL 3'),  # ID Verified US Citizen
+		(4, 'LEVEL 4'),  # ID Verified non-US Citizen or Accredited Investor
 	)
 
 	avatar = models.ImageField(upload_to=user_avatar_dir, default='avatars/default.jpg', null=True, blank=True)
@@ -143,7 +140,8 @@ class InvestorUser(models.Model):
 	nationality = models.CharField(max_length=20, null=True, blank=True)
 
 	# Verification
-	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1)
+	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1,
+	                                         help_text='LEVEL 0 Email Verified, LEVEL 1 Phone Verified, LEVEL 2 ID Uploaded, LEVEL 3 ID Verified US Citizen, LEVEL 4 ID Verified non-US Citizen or Accredited Investor')
 	id_verification = models.OneToOneField('IDVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 	accredited_investor_verification = models.OneToOneField('InvestorVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 
@@ -276,7 +274,9 @@ class IDVerification(models.Model):
 		# save
 		self.save()
 		investor.save()
-	# TODO: send email to user for the status updating
+
+
+# TODO: send email to user for the status updating
 
 
 class InvestorVerification(models.Model):
@@ -309,7 +309,7 @@ class VerificationCode(models.Model):
 
 	user = models.OneToOneField('User', related_name='verification_code', on_delete=models.PROTECT)
 	code = models.CharField(max_length=200)
-	expire_time = models.DateTimeField(default='django.utils.timezone.now')
+	expire_time = models.DateTimeField(default=timezone.now)
 
 	@property
 	def is_expired(self):
@@ -330,3 +330,18 @@ class VerificationCode(models.Model):
 def add_verification_code_to_user(sender, **kwargs):
 	if kwargs.get('created', True):
 		VerificationCode.objects.create(user=kwargs.get('instance'))
+
+
+class UserLog(models.Model):
+	"""
+	UserLog Code model
+	"""
+	user = models.ForeignKey('User', related_name='logs', on_delete=models.PROTECT)
+	type = models.CharField(max_length=200)
+	ip = models.GenericIPAddressField()
+	device = models.CharField(max_length=200)
+	datetime = models.DateField(auto_now_add=True)
+
+	@property
+	def __str__(self):
+		return 'UserLog ' + self.datetime.isoformat()
