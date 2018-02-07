@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.db.utils import IntegrityError
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -15,7 +16,7 @@ from Gullin.utils.send.email import send_email
 from Gullin.utils.send.sms import send_sms
 
 from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer
-from .models import InvestorUser
+from .models import InvestorUser, User
 from ..wallets.models import Wallet
 
 
@@ -63,34 +64,88 @@ class UserAuthViewSet(viewsets.ViewSet):
 		return jwt_return_auth_token(user)
 
 	def log_in(self, request):
-		serializer = JSONWebTokenSerializer(data=request.data)
+		# Login Attempt
+		if request.method == 'POST':
+			# Try login
+			serializer = JSONWebTokenSerializer(data=request.data)
+			# If login successful
+			if serializer.is_valid():
+				# Save user and token to session
+				user = serializer.object.get('user')
+				request.session['user'] = user.id
+				request.session['token'] = serializer.object.get('token')
 
-		if serializer.is_valid():
-			user = serializer.object.get('user') or request.user
-			token = serializer.object.get('token')
-			# TODO: 2 factor auth need to be implemented
+				# Start 2 factor auth code
+				# If user not enabled TOTP
+				if not user.TOTP_enabled:
+					# Refresh code
+					user.verification_code.refresh()
+					# Send to code user
+					phone_num = user.phone_country_code + user.phone
+					send_sms(phone_num,
+					         'Verification Code: ' + user.verification_code.code + '\nInvalid in 5 minutes.')
 
-			# Update user last login timestamp
-			user.update_last_login()
+				# If user enabled TOTP
+				else:
+					# TODO: work with TOTP clients
+					pass
 
-			# Update user last login IP
-			user.update_last_login_ip(get_client_ip(request))
+				# TODO: generate log
+				return Response(status=status.HTTP_200_OK)
+			else:
+				return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-			jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
-			response_data = jwt_response_payload_handler(token, user, request)
+		# Verify 2 Factor code
+		elif request.method == 'PATCH':
+			# check session
+			if request.session.get('user') and request.session.get('token'):
+				# retrieve data from session
+				user = User.objects.get(id=request.session['user'])
+				token = request.session['token']
+				# clear session
+				request.session.clear()
 
-			if api_settings.JWT_AUTH_COOKIE:
+				# Check verifications code
+
+				# If user not enabled TOTP
+				if not user.TOTP_enabled:
+					verification_code = user.verification_code
+					# Check If code is valid
+					if verification_code.is_expired:
+						return Response({'error': 'Verification code expired, please request another code.'},
+						                status=status.HTTP_400_BAD_REQUEST)
+					if not (request.data.get('verification_code') == verification_code.code):
+						return Response({'error': 'Verification code doesn\'t match, please try again or request another code.'},
+						                status=status.HTTP_400_BAD_REQUEST)
+					# Verification code is valid, so expire verification code
+					verification_code.expire()
+
+				# If user enabled TOTP
+				else:
+					# TODO: work with TOTP clients
+					pass
+
+				# Code is valid
+
+				# TODO: generate log
+
+				# Update user last login timestamp
+				user.update_last_login()
+
+				# Update user last login IP
+				user.update_last_login_ip(get_client_ip(request))
+
+				jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
+				response_data = jwt_response_payload_handler(token, user, request)
+
 				response = Response()
 				response.set_cookie(api_settings.JWT_AUTH_COOKIE,
 				                    response_data['token'],
 				                    expires=(timezone.now() + api_settings.JWT_EXPIRATION_DELTA),
 				                    httponly=True)
+				return response
 			else:
-				response = Response(response_data)
-
-			return response
-		else:
-			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+				return Response({'error': 'You have to login first!'}, status=status.HTTP_400_BAD_REQUEST)
 
 	def log_out(self, request):
 		response = Response()
@@ -99,8 +154,7 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 	def refresh(self, request):
 		data = request.data.copy()
-		if api_settings.JWT_AUTH_COOKIE:
-			data['token'] = request.COOKIES.get(api_settings.JWT_AUTH_COOKIE)
+		data['token'] = request.COOKIES.get(api_settings.JWT_AUTH_COOKIE)
 
 		serializer = RefreshJSONWebTokenSerializer(data=data)
 
@@ -111,14 +165,11 @@ class UserAuthViewSet(viewsets.ViewSet):
 			jwt_response_payload_handler = api_settings.JWT_RESPONSE_PAYLOAD_HANDLER
 			response_data = jwt_response_payload_handler(token, user, request)
 
-			if api_settings.JWT_AUTH_COOKIE:
-				response = Response()
-				response.set_cookie(api_settings.JWT_AUTH_COOKIE,
-				                    response_data['token'],
-				                    expires=(timezone.now() + api_settings.JWT_EXPIRATION_DELTA),
-				                    httponly=True)
-			else:
-				response = Response(response_data)
+			response = Response()
+			response.set_cookie(api_settings.JWT_AUTH_COOKIE,
+			                    response_data['token'],
+			                    expires=(timezone.now() + api_settings.JWT_EXPIRATION_DELTA),
+			                    httponly=True)
 
 			return response
 
@@ -136,21 +187,26 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 		# Verify user email
 		investor_user = request.user.investor
 		verification_code = request.user.verification_code
-		if not verification_code.is_expired and request.data.get('verification_code') == verification_code:
-			# Update user verification level
-			investor_user.verification_level = 0
-			investor_user.save()
+		if request.data.get('verification_code') == verification_code.code:
+			if not verification_code.is_expired:
+				# Update user verification level
+				investor_user.verification_level = 0
+				investor_user.save()
 
-			# Expire verification code
-			verification_code.expire()
+				# Expire verification code
+				verification_code.expire()
 
-			return Response(status=status.HTTP_200_OK)
+				return Response(status=status.HTTP_200_OK)
+			else:
+				return Response({'error': 'Verification code expired, please request another code.'},
+				                status=status.HTTP_400_BAD_REQUEST)
 		else:
-			return Response({'error': 'Verification failed, please try again or request another code'},
+			return Response({'error': 'Verification code doesn\'t match, please try again or request another code.'},
 			                status=status.HTTP_400_BAD_REQUEST)
 
 	def verify_phone(self, request):
 		# Add phone number for the current user and send verification code
+		# TODO: check if phone number is different
 		if request.method == 'POST':
 			# request.data must contain country_name, phone
 			country_name = request.data.get('country_name')
@@ -163,16 +219,20 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 				# Update phone number of user model
 				user.phone_country_code = get_code_by_country_name(country_name)
 				user.phone = request.data.get('phone')
-				user.save()
+				try:
+					user.save()
+				except IntegrityError:
+					return Response({'error': 'A user with this phone number already exists.'},
+					                status=status.HTTP_403_FORBIDDEN)
 
 				# Do an arbitrary assumption of user's nationality based on phone number
 				investor_user.nationality = country_name
-				investor_user.investor.save()
+				investor_user.save()
 
 				# Send SMS to user
 				verification_code.refresh()
 				phone_num = user.phone_country_code + user.phone
-				msg = 'Verification Code: ' + verification_code.code + '\n Valid in 5 minutes.'
+				msg = 'Verification Code: ' + verification_code.code + '\nInvalid in 5 minutes.'
 				send_sms(phone_num, msg)
 
 				return Response(status=status.HTTP_200_OK)
@@ -184,60 +244,31 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 		elif request.method == 'PATCH':
 			investor_user = request.user.investor
 			verification_code = request.user.verification_code
-			if not verification_code.is_expired and request.data.get('verification_code') == verification_code:
-				# Update user verification level
-				investor_user.verification_level = 1
-				investor_user.save()
+			if request.data.get('verification_code') == verification_code.code:
+				if not verification_code.is_expired:
+					# Update user verification level
+					investor_user.verification_level = 1
+					investor_user.save()
 
-				# Expire verification code
-				verification_code.expire()
+					# Expire verification code
+					verification_code.expire()
 
-				return Response(status=status.HTTP_200_OK)
+					return Response(status=status.HTTP_200_OK)
+				else:
+					return Response({'error': 'Verification code expired, please request another code.'},
+					                status=status.HTTP_400_BAD_REQUEST)
 			else:
-				return Response({'error': 'Verification failed, please try again or request another code'},
+				return Response({'error': 'Verification code doesn\'t match, please try again or request another code.'},
 				                status=status.HTTP_400_BAD_REQUEST)
-
-	def resend_code(self, request):
-		if request.data.get('email'):
-			verification_code = request.user.verification_code
-			verification_code.refresh()
-			ctx = {
-				'full_name'        : request.user.investor.full_name,
-				'verification_code': verification_code.code
-			}
-			send_email([request.user.email], 'Gullin - Verification Code', 'send_email_verification_code', ctx)
-			return Response(status=status.HTTP_200_OK)
-
-		elif request.data.get('sms'):
-			verification_code = request.user.verification_code
-			verification_code.refresh()
-
-			phone_num = request.user.phone_country_code + request.user.phone
-			msg = 'Gullin Verification Code: ' + verification_code.code + '\n Valid in 5 minutes.'
-			send_sms(phone_num, msg)
-
-			return Response(status=status.HTTP_200_OK)
 
 	def save_wallet_address(self, request):
 		user_wallet = request.user.investor.wallet
 		if user_wallet.eth_address:
-			return Response(status=status.HTTP_403_FORBIDDEN)
+			return Response({'error': 'Your are already bound with a wallet'}, status=status.HTTP_403_FORBIDDEN)
 		else:
-			user_wallet.eth_address = request.data.get('public_address')
+			user_wallet.eth_address = request.data.get('eth_address')
 			user_wallet.save()
-			return Response(status=status.HTTP_400_BAD_REQUEST)
-
-	def upload_id(self, request):
-		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality'
-		serializer = FullIDVerificationSerializer(data=request.data)
-		if serializer.is_valid():
-			id_verification = serializer.save()
-			request.user.investor.id_verification = id_verification
-			request.user.investor.save()
-
-			return Response(status=status.HTTP_201_CREATED)
-		else:
-			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+			return Response(status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ViewSet):
@@ -260,5 +291,41 @@ class UserViewSet(viewsets.ViewSet):
 			# Update self
 			pass
 
+	def upload_id(self, request):
+		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality'
+		serializer = FullIDVerificationSerializer(data=request.data)
+		if serializer.is_valid():
+			id_verification = serializer.save()
+			request.user.investor.id_verification = id_verification
+			request.user.investor.save()
+
+			return Response(status=status.HTTP_201_CREATED)
+		else:
+			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+	def send_verification_code(self, request):
+		if request.data.get('email'):
+			verification_code = request.user.verification_code
+			verification_code.refresh()
+			ctx = {
+				'full_name'        : request.user.investor.full_name,
+				'verification_code': verification_code.code
+			}
+			send_email([request.user.email], 'Gullin - Verification Code', 'send_email_verification_code', ctx)
+			return Response(status=status.HTTP_200_OK)
+
+		elif request.data.get('sms'):
+			verification_code = request.user.verification_code
+			verification_code.refresh()
+
+			phone_num = request.user.phone_country_code + request.user.phone
+			msg = 'Gullin Verification Code: ' + verification_code.code + '\n Valid in 5 minutes.'
+			send_sms(phone_num, msg)
+
+			return Response(status=status.HTTP_200_OK)
+
 	def accredited_investor_verification(self, request):
+		pass
+
+	def two_factor_auth(self, request):
 		pass
