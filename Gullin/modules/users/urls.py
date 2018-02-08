@@ -55,7 +55,8 @@ urlpatterns = [
 	path('followup/phone/', user_verify_phone, name='user_verify_phone'),
 	path('followup/resend/', user_resend_verification_code, name='user_resend_verification_code'),
 	path('followup/wallet_address/', user_wallet_address, name='user_wallet_address'),
-	path('followup/upload_id/', user_upload_id, name='user_upload_id'),
+
+	path('verify/upload_id/', user_upload_id, name='user_upload_id'),
 
 	path('me/', user_me, name='user_me'),
 ]

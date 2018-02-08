@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group as BuiltInGroup
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from .models import User, InvestorUser, CompanyUser, AnalystUser, InvestorVerification, IDVerification, VerificationCode, UserLog
+from .models import User, InvestorUser, CompanyUser, AnalystUser, InvestorUserAddress, InvestorVerification, IDVerification, VerificationCode, UserLog
 from .forms import UserCreationForm
 
 
@@ -72,7 +72,7 @@ class InvestorUserAdmin(admin.ModelAdmin):
 	# Detail Page Settings
 	fieldsets = (
 		('Base User', {'fields': ('edit_user',)}),
-		('User Info', {'fields': ('avatar', 'first_name', 'last_name', 'nationality',)}),
+		('User Info', {'fields': ('first_name', 'last_name', 'birthday', 'nationality', 'address',)}),
 		('Verification', {'fields': ('verification_level', 'id_verification', 'accredited_investor_verification',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
@@ -83,7 +83,7 @@ class InvestorUserAdmin(admin.ModelAdmin):
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.user.email))
 
 
-@admin.register(AnalystUser)
+# @admin.register(AnalystUser)
 class AnalystUserAdmin(admin.ModelAdmin):
 	# List display Settings
 	list_display = ('id', 'full_name', 'created', 'updated',)
@@ -105,7 +105,7 @@ class AnalystUserAdmin(admin.ModelAdmin):
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.user.email))
 
 
-@admin.register(CompanyUser)
+# @admin.register(CompanyUser)
 class CompanyUserAdmin(admin.ModelAdmin):
 	# List display Settings
 	list_display = ('id', 'user', 'created', 'updated',)
@@ -125,12 +125,52 @@ class CompanyUserAdmin(admin.ModelAdmin):
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.user.email))
 
 
+@admin.register(InvestorUserAddress)
+class InvestorUserAddressAdmin(admin.ModelAdmin):
+	# List display Settings
+	list_display = ('id', 'investor_user', 'created', 'updated',)
+	ordering = ('created',)
+
+	# Detail Page Settings
+	fieldsets = (
+		('Base User', {'fields': ('edit_investor_user',)}),
+		('Address Info', {'fields': ('address1', 'address2', 'city', 'state', 'zipcode', 'country',)}),
+		('Timestamp', {'fields': ('created', 'updated',)}),
+	)
+	readonly_fields = ('created', 'updated', 'edit_investor_user',)
+
+	def edit_investor_user(self, obj):
+		change_url = reverse('admin:users_investoruser_change', args=(obj.investor_user.id,))
+		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.investor_user.full_name))
+
+
 @admin.register(IDVerification)
 class IDVerificationAdmin(admin.ModelAdmin):
-	# official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
-	# official_id = models.FileField(upload_to=official_id_dir, null=True, blank=True)
-	# nationality = models.CharField(max_length=20, null=True, blank=True)
-	pass
+	# List display Settings
+	list_display = ('id', 'investor_user', 'official_id_type', 'created', 'updated',)
+	search_fields = ('investor_user',)
+	ordering = ('created',)
+
+	# Detail Page Settings
+	fieldsets = (
+		('Base User', {'fields': ('edit_investor_user',)}),
+		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_back', 'user_holding_official_id',)}),
+		('Nationality', {'fields': ('nationality',)}),
+		('Verify', {'fields': ('is_verified',)}),
+		('Action', {'fields': ('verify_identity', 'unverify_identity')}),
+		('Timestamp', {'fields': ('created', 'updated',)}),
+	)
+	readonly_fields = ('created', 'updated', 'edit_investor_user', 'verify_identity', 'unverify_identity')
+
+	def edit_investor_user(self, obj):
+		change_url = reverse('admin:users_investoruser_change', args=(obj.investor_user.id,))
+		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.investor_user.full_name))
+
+	def verify_identity(self, obj):
+		return obj.verify_identity()
+
+	def unverify_identity(self, obj):
+		return obj.unverify_identity()
 
 
 @admin.register(InvestorVerification)

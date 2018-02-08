@@ -57,7 +57,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 	email = models.EmailField(unique=True, blank=True,
 	                          error_messages={'unique': "A user with that email already exists."})
 	phone_country_code = models.CharField(max_length=30, null=True, blank=True)
-	phone = models.CharField(max_length=30, unique=True, null=True, blank=True)
+	phone = models.CharField(max_length=30, null=True, blank=True)
 
 	# Security
 	last_login = models.DateTimeField(default=timezone.now)
@@ -127,21 +127,24 @@ class InvestorUser(models.Model):
 	"""
 	LEVEL_CHOICES = (
 		(-1, 'Not Verified'),  # Not Verified
-		(0, 'LEVEL 0'),  # Email Verified
-		(1, 'LEVEL 1'),  # Phone Verified
-		(2, 'LEVEL 2'),  # ID Uploaded
-		(3, 'LEVEL 3'),  # ID Verified US Citizen
-		(4, 'LEVEL 4'),  # ID Verified non-US Citizen or Accredited Investor
+		(0, 'LEVEL 0 - Email Verified'),
+		(1, 'LEVEL 1 - Phone Verified'),
+		(2, 'LEVEL 2 - Wallet Created'),
+		(3, 'LEVEL 3 - ID Processing'),
+		(4, 'LEVEL 4 - ID Verified'),
+		(5, 'LEVEL 5 - Accredited Investor Processing'),
+		(6, 'LEVEL 6 - Accredited Investor Verified'),
 	)
 
-	avatar = models.ImageField(upload_to=user_avatar_dir, default='avatars/default.jpg', null=True, blank=True)
+	# Personal Details
 	first_name = models.CharField(max_length=30, null=True, blank=True)
 	last_name = models.CharField(max_length=50, null=True, blank=True)
 	nationality = models.CharField(max_length=20, null=True, blank=True)
+	address = models.OneToOneField('InvestorUserAddress', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
+	birthday = models.DateField(null=True, blank=True)
 
 	# Verification
-	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1,
-	                                         help_text='LEVEL 0 Email Verified, LEVEL 1 Phone Verified, LEVEL 2 ID Uploaded, LEVEL 3 ID Verified US Citizen, LEVEL 4 ID Verified non-US Citizen or Accredited Investor')
+	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1)
 	id_verification = models.OneToOneField('IDVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 	accredited_investor_verification = models.OneToOneField('InvestorVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 
@@ -216,18 +219,39 @@ class AnalystUser(models.Model):
 		return self.first_name + ' ' + self.last_name
 
 
+class InvestorUserAddress(models.Model):
+	"""
+	InvestorUserAddress model is used for store InvestorUser address.
+	"""
+	# Address Info
+	address1 = models.CharField(max_length=400)
+	address2 = models.CharField(max_length=200, null=True, blank=True)
+	city = models.CharField(max_length=200)
+	state = models.CharField(max_length=200)
+	zipcode = models.CharField(max_length=200)
+	country = models.CharField(max_length=200)
+
+	# TimeStamp
+	created = models.DateTimeField(auto_now_add=True)
+	updated = models.DateTimeField(auto_now=True)
+
+	def __str__(self):
+		return self.investor_user.full_name + ' Address'
+
+
 class IDVerification(models.Model):
 	"""
 	ID Verification model is used for verify InvestorUser identity.
 	"""
 
-	ID_TYPE_CHOICES = (('Driver License', 'Driver License'),
-	                   ('Photo ID', 'Photo ID'),
-	                   ('Passport', 'Passport'))
+	ID_TYPE_CHOICES = (('driver_license', 'Driver License'),
+	                   ('photo_id', 'Photo ID'),
+	                   ('passport', 'Passport'))
 	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
-	official_id_front = models.FileField(upload_to=official_id_dir, null=True, blank=True)
+	official_id_front = models.FileField(upload_to=official_id_dir)
 	official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True)
+	user_holding_official_id = models.FileField(upload_to=official_id_dir)
 
 	nationality = models.CharField(max_length=20, null=True, blank=True)
 
@@ -252,12 +276,10 @@ class IDVerification(models.Model):
 		self.is_verified = True
 		# sync nationality (this is for users who use different country phone number when register,
 		# when we manually check user identity, we have to update user nationality on the admin portal and sync with investor user model)
+		# TODO: make sure nationality format is same everywhere
 		investor.nationality = self.nationality
 		# update user verification level
-		if self.nationality == 'United States':
-			investor.verification_level = 2
-		else:
-			investor.verification_level = 3
+		investor.verification_level = 4
 		# save
 		self.save()
 		investor.save()
@@ -270,7 +292,7 @@ class IDVerification(models.Model):
 		# update verification status
 		self.is_verified = True
 		# update user verification level
-		investor.verification_level = 1
+		investor.verification_level = 2
 		# save
 		self.save()
 		investor.save()

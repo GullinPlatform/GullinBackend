@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import User, InvestorUser, CompanyUser, AnalystUser, IDVerification, InvestorVerification, VerificationCode
+from .models import User, InvestorUser, CompanyUser, AnalystUser, InvestorUserAddress, IDVerification, InvestorVerification, VerificationCode
 
 
 class FullUserSerializer(serializers.ModelSerializer):
@@ -26,6 +26,12 @@ class BasicUserSerializer(serializers.ModelSerializer):
 		model = User
 		fields = ('id', 'email', 'phone_country_code', 'phone', 'TOTP_enabled',
 		          'is_investor', 'is_company_user', 'is_analyst')
+
+
+class BaseUserAddressSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = InvestorUserAddress
+		fields = ('address1', 'address2', 'city', 'state', 'zipcode', 'country',)
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
@@ -55,11 +61,12 @@ class FullInvestorUserSerializer(serializers.ModelSerializer):
 	Full Serializer for InvestorUser
 	"""
 	user = BasicUserSerializer()
+	address = BaseUserAddressSerializer()
 
 	class Meta:
 		model = InvestorUser
 		fields = ('user',
-		          'avatar', 'first_name', 'last_name', 'nationality',
+		          'first_name', 'last_name', 'birthday', 'nationality', 'address',
 		          'verification_level', 'id_verification', 'accredited_investor_verification',
 		          'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
@@ -87,7 +94,7 @@ class FullAnalystUserSerializer(serializers.ModelSerializer):
 class FullIDVerificationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = IDVerification
-		fields = ('official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'created', 'updated',)
+		fields = ('official_id_type', 'official_id_back', 'official_id_front', 'user_holding_official_id', 'nationality', 'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
 
 
