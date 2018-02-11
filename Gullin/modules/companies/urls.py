@@ -13,5 +13,5 @@ company_detail = CompanyViewSet.as_view({
 
 urlpatterns = [
 	path('list/<list_type>/', company_list, name='company_list'),
-	path('<int:id>/', company_detail, name='company_detail'),
+	path('<id>/', company_detail, name='company_detail'),
 ]

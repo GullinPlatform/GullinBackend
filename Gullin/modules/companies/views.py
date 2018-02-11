@@ -30,9 +30,20 @@ class CompanyViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 	def detail(self, request, id):
-		company = Company.objects.filter(id=id)
-		if company:
-			serializer = FullCompanySerializer(company[0])
-			return Response(serializer.data)
-		else:
-			return Response(status=status.HTTP_404_NOT_FOUND)
+
+		try:
+			company = Company.objects.filter(id=id).first()
+			if company:
+				serializer = FullCompanySerializer(company)
+				return Response(serializer.data)
+		except ValueError:
+			if Company.objects.filter(name=id):
+				company = Company.objects.get(name=id)
+				serializer = FullCompanySerializer(company)
+				return Response(serializer.data)
+			elif Company.objects.filter(token_detail__token_code=id):
+				company = Company.objects.get(token_detail__token_code=id)
+				serializer = FullCompanySerializer(company)
+				return Response(serializer.data)
+
+		return Response(status=status.HTTP_404_NOT_FOUND)

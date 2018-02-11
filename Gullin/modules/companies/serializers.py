@@ -25,7 +25,7 @@ class MiniTokenDetailSerializer(serializers.ModelSerializer):
 class BalanceTokenDetailSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TokenDetail
-		fields = ('token_code', 'token_name', 'token_logo', 'token_address', 'decimals',)
+		fields = ('token_code', 'token_name', 'token_logo', 'token_address', 'decimals', 'price',)
 
 
 class FullPressReleaseSerializer(serializers.ModelSerializer):
