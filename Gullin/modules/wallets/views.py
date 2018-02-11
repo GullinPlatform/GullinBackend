@@ -25,20 +25,23 @@ class WalletViewSet(viewsets.ViewSet):
 		"""
 		Update user wallet balance info
 		"""
-		if request.data.get('new_balance'):
-			for token_code, balance in request.data.get('new_balance').items():
-				wallet_balances = request.user.investor.wallet.balances.all()
-				wallet_balances.get(token__token_code=token_code).balance = balance
+		if request.data:
+			for token_code, balance in request.data.items():
+				wallet_balance = request.user.investor.wallet.balances.get(token__token_code=token_code)
+				wallet_balance.balance = balance
+				wallet_balance.save()
 		return Response(status=status.HTTP_200_OK)
 
 	def transaction(self, request):
 		"""
-		Retrieve/Record user transactions
+		Record user transactions
 		"""
-		if request.method == 'GET':
-			serializer = FullTransactionSerializer(request.user.investor.transacions)
-			return Response(serializer.data)
-		elif request.method == 'POST':
-			serializer = FullTransactionSerializer(data=request.data)
-			serializer.is_valid(raise_exception=True)
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
+		for transaction in request.data['transactions']:
+			try:
+				transaction['investor_user'] = request.user.investor.id
+				serializer = FullTransactionSerializer(data=transaction)
+				serializer.is_valid(raise_exception=True)
+				serializer.save()
+			except:
+				pass
+		return Response(status=status.HTTP_201_CREATED)

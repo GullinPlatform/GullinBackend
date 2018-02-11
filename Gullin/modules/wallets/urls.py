@@ -11,7 +11,6 @@ wallet_balance = WalletViewSet.as_view({
 })
 
 wallet_transaction = WalletViewSet.as_view({
-	'get' : 'transaction',
 	'post': 'transaction',
 })
 

@@ -1,5 +1,8 @@
 from django.db import models
 
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from ..users.models import User
 from ..companies.models import TokenDetail
 
@@ -61,26 +64,27 @@ class Transaction(models.Model):
 	)
 
 	# Link to wallet
-	user = models.ForeignKey('users.InvestorUser', on_delete=models.PROTECT)
+	wallet = models.ForeignKey('Wallet', related_name='transactions', on_delete=models.PROTECT)
 
 	# Transaction Info
 	type = models.CharField(choices=TRANSACTION_TYPE_CHOICES, max_length=20)
-	datetime = models.DateTimeField(auto_now_add=True)
+	datetime = models.DateTimeField()
 
 	from_address = models.CharField(max_length=200, null=True)
-	from_address_type = models.CharField(choices=DESTINATION_CHOICES, max_length=20)
-	from_address_note = models.CharField(max_length=20)
+	from_address_type = models.CharField(choices=DESTINATION_CHOICES, max_length=20, null=True, blank=True)
+	from_address_note = models.CharField(max_length=20, null=True, blank=True)
 
 	to_address = models.CharField(max_length=100, null=True)
-	to_address_type = models.CharField(choices=DESTINATION_CHOICES, max_length=20)
-	to_address_note = models.CharField(max_length=20)
+	to_address_type = models.CharField(choices=DESTINATION_CHOICES, max_length=20, null=True, blank=True)
+	to_address_note = models.CharField(max_length=20, null=True, blank=True)
 
-	amount = models.FloatField()
-	token_code = models.CharField(max_length=10)
-	transaction_hash = models.CharField(max_length=100, null=True, blank=True)
+	value = models.FloatField()
+	value_unit = models.CharField(max_length=10)
+	tx_fee = models.FloatField()
+	tx_hash = models.CharField(max_length=100, null=True, blank=True, unique=True)
 
 	def __str__(self):
-		return 'transaction of' + str(self.user)
+		return 'Transaction of ' + str(self.wallet)
 
 
 class DepositRecord(models.Model):
@@ -105,3 +109,12 @@ class DepositRecord(models.Model):
 
 	def __str__(self):
 		return 'deposit to' + str(self.wallet)
+
+
+# Signal handling function to add VerificationCode to every new created User instance
+@receiver(post_save, sender=TokenDetail)
+def add_new_token_to_user_wallet(sender, **kwargs):
+	if kwargs.get('created', True):
+		for wallet in Wallet.objects.all():
+			token = kwargs.get('instance')
+			Balance.objects.create(token_id=token.id, wallet_id=wallet.id)

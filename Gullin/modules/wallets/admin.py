@@ -17,6 +17,18 @@ class BalanceInline(admin.TabularInline):
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.token.token_code))
 
 
+class TransactionInline(admin.TabularInline):
+	model = Transaction
+	show_change_link = True
+	fields = ('type', 'datetime',
+	          'from_address_type', 'to_address_type',
+	          'value', 'value_unit', 'tx_hash', 'tx_fee',)
+	readonly_fields = ('type', 'datetime',
+	                   'from_address_type', 'to_address_type',
+	                   'value', 'value_unit', 'tx_hash', 'tx_fee',)
+	extra = 0
+
+
 @admin.register(Wallet)
 class WalletAdmin(admin.ModelAdmin):
 	# List display Settings
@@ -31,7 +43,7 @@ class WalletAdmin(admin.ModelAdmin):
 	)
 	readonly_fields = ('id', 'created', 'created_eth_block_num', 'investor_user_detail', 'eth_address',)
 
-	inlines = [BalanceInline, ]
+	inlines = [BalanceInline, TransactionInline]
 
 	def investor_user_detail(self, obj):
 		change_url = reverse('admin:users_investoruser_change', args=(obj.investor_user.id,))
@@ -65,20 +77,20 @@ class BalanceAdmin(admin.ModelAdmin):
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
 	# List display Settings
-	list_display = ('id', 'type', 'amount', 'token_code', 'from_address_type', 'to_address_type', 'datetime',)
+	list_display = ('id', 'type', 'value', 'value_unit', 'from_address_type', 'to_address_type', 'datetime',)
 	list_filter = ('datetime',)
 	ordering = ('datetime',)
 
 	# Detail Page Settings
 	fieldsets = (
-		('User', {'fields': ('edit_user',)}),
+		('Wallet', {'fields': ('wallet_detail',)}),
 		('Transaction Detail',
 		 {'fields': ('type', 'datetime',
 		             'from_address', 'from_address_type', 'from_address_note',
 		             'to_address', 'to_address_type', 'to_address_note',
-		             'amount', 'token_code',)}),)
-	readonly_fields = ('edit_user', 'from_address', 'to_address', 'datetime',)
+		             'value', 'value_unit', 'tx_hash', 'tx_fee',)}),)
+	readonly_fields = ('wallet_detail', 'from_address', 'to_address', 'datetime', 'tx_hash',)
 
-	def edit_user(self, obj):
-		change_url = reverse('admin:users_user_change', args=(obj.user.id,))
-		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.user.email))
+	def wallet_detail(self, obj):
+		change_url = reverse('admin:wallets_wallet_change', args=(obj.wallet.id,))
+		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.wallet))
