@@ -106,5 +106,14 @@ ENV/
 # System File
 .DS_Store
 
+# temp file and sensitive files
 Gullin/tmp\.sqlite3
-/Gullin/settings/aws_secret_key
+Gullin/settings/securities/
+
+Gullin/modules/wallets/migrations/
+Gullin/modules/users/migrations/
+Gullin/modules/companies/migrations/
+
+~Gullin/modules/wallets/migrations/__init__.py
+~Gullin/modules/users/migrations/__init__.py
+~Gullin/modules/companies/migrations/__init__.py
