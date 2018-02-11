@@ -101,8 +101,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 	objects = UserManager()
 
 	class Meta:
-		verbose_name = 'Base User'
-		verbose_name_plural = 'Base Users'
+		verbose_name_plural = '1. Users'
 		ordering = ['-created']
 		unique_together = ('phone_country_code', 'phone')
 
@@ -153,8 +152,7 @@ class InvestorUser(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 
 	class Meta:
-		verbose_name = 'Investor'
-		verbose_name_plural = 'Subusers - Investor'
+		verbose_name_plural = '2. Investor Users'
 
 	def __str__(self):
 		return self.full_name
@@ -235,6 +233,10 @@ class InvestorUserAddress(models.Model):
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		verbose_name_plural = '3. Investor User Address'
+
+
 	def __str__(self):
 		return self.investor_user.full_name + ' Address'
 
@@ -263,8 +265,7 @@ class IDVerification(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 
 	class Meta:
-		verbose_name = 'ID Verification'
-		verbose_name_plural = 'User Verification - ID'
+		verbose_name_plural = '4. ID Verifications'
 
 	def __str__(self):
 		return self.official_id_type
@@ -314,8 +315,7 @@ class InvestorVerification(models.Model):
 	doc2 = models.FileField(upload_to=official_id_dir, null=True, blank=True)
 
 	class Meta:
-		verbose_name = 'Accredited Investor Verification'
-		verbose_name_plural = 'User Verification - Accredited Investor'
+		verbose_name_plural = '5. Accredited Investor Verifications'
 
 	def __str__(self):
 		return self.doc_type
@@ -333,6 +333,9 @@ class VerificationCode(models.Model):
 	code = models.CharField(max_length=200)
 	expire_time = models.DateTimeField(default=timezone.now)
 
+	class Meta:
+		verbose_name_plural = '6. Verification Codes'
+
 	@property
 	def is_expired(self):
 		return timezone.now() > self.expire_time
@@ -347,13 +350,6 @@ class VerificationCode(models.Model):
 		self.save()
 
 
-# Signal handling function to add VerificationCode to every new created User instance
-@receiver(post_save, sender=User)
-def add_verification_code_to_user(sender, **kwargs):
-	if kwargs.get('created', True):
-		VerificationCode.objects.create(user=kwargs.get('instance'))
-
-
 class UserLog(models.Model):
 	"""
 	UserLog Code model
@@ -364,6 +360,16 @@ class UserLog(models.Model):
 	device = models.CharField(max_length=200)
 	datetime = models.DateField(auto_now_add=True)
 
+	class Meta:
+		verbose_name_plural = '7. User Logs'
+
 	@property
 	def __str__(self):
 		return 'UserLog ' + self.datetime.isoformat()
+
+
+# Signal handling function to add VerificationCode to every new created User instance
+@receiver(post_save, sender=User)
+def add_verification_code_to_user(sender, **kwargs):
+	if kwargs.get('created', True):
+		VerificationCode.objects.create(user=kwargs.get('instance'))
