@@ -228,7 +228,6 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 
 	def verify_phone(self, request):
 		# Add phone number for the current user and send verification code
-		# TODO: check if phone number is different
 		if request.method == 'POST':
 			# request.data must contain country_name, phone
 			country_name = request.data.get('country_name')

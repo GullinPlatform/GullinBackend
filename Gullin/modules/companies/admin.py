@@ -12,7 +12,7 @@ class CompanyAdmin(admin.ModelAdmin):
 
 	# Detail Page Settings
 	fieldsets = (
-		('Company Info', {'fields': ('name', 'display_img', 'logo', 'short_description', 'white_paper', 'website',)}),
+		('Company Info', {'fields': ('name', 'display_img', 'logo', 'short_description', 'website',)}),
 		('Description', {'fields': ('description',)}),
 		('Token Detail', {'fields': ('token_detail',)}),
 		('Social Media', {'fields': ('facebook', 'telegram', 'slack', 'twitter', 'medium',)}),

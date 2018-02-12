@@ -28,7 +28,10 @@ class WalletViewSet(viewsets.ViewSet):
 		if request.data:
 			for token_code, balance in request.data.items():
 				wallet_balance = request.user.investor.wallet.balances.get(token__token_code=token_code)
-				wallet_balance.balance = balance
+				if balance:
+					wallet_balance.balance = balance
+				else:
+					wallet_balance.balance = 0
 				wallet_balance.save()
 		return Response(status=status.HTTP_200_OK)
 

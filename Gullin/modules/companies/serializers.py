@@ -25,7 +25,7 @@ class MiniTokenDetailSerializer(serializers.ModelSerializer):
 class BalanceTokenDetailSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TokenDetail
-		fields = ('token_code', 'token_name', 'token_logo', 'token_address', 'decimals', 'price',)
+		fields = ('token_code', 'token_name', 'token_address', 'decimals', 'price',)
 
 
 class FullPressReleaseSerializer(serializers.ModelSerializer):
@@ -63,7 +63,7 @@ class FullCompanySerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Company
-		fields = ('id', 'name', 'logo', 'short_description', 'white_paper', 'website',
+		fields = ('id', 'name', 'logo', 'short_description', 'website',
 		          'description',
 		          'token_detail', 'members', 'documents', 'press_releases',
 		          'facebook', 'telegram', 'slack', 'twitter', 'medium',
