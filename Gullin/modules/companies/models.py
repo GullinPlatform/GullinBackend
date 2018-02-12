@@ -13,7 +13,6 @@ class Company(models.Model):
 	logo = models.ImageField(upload_to=company_icon_dir, null=True)
 	display_img = models.ImageField(upload_to=company_icon_dir, null=True)
 	short_description = models.CharField(max_length=150)
-	white_paper = models.URLField(max_length=150)
 	website = models.URLField(max_length=150)
 
 	# Project Description
@@ -27,11 +26,11 @@ class Company(models.Model):
 	# Press Releases
 
 	# Social Media
-	facebook = models.URLField(max_length=150)
-	telegram = models.URLField(max_length=150)
-	slack = models.URLField(max_length=150)
-	twitter = models.URLField(max_length=150)
-	medium = models.URLField(max_length=150)
+	facebook = models.URLField(max_length=150, null=True, blank=True)
+	telegram = models.URLField(max_length=150, null=True, blank=True)
+	slack = models.URLField(max_length=150, null=True, blank=True)
+	twitter = models.URLField(max_length=150, null=True, blank=True)
+	medium = models.URLField(max_length=150, null=True, blank=True)
 
 	# Timestamp
 	created = models.DateTimeField(auto_now_add=True)
