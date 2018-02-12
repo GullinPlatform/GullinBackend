@@ -55,10 +55,11 @@ class UserAuthViewSet(viewsets.ViewSet):
 		verification_code = user.verification_code
 		verification_code.refresh()
 		ctx = {
-			'full_name'        : investor.full_name,
-			'verification_code': verification_code.code
+			'user_full_name'   : investor.full_name,
+			'verification_code': verification_code.code,
+			'user_email'       : user.email
 		}
-		send_email([user.email], 'Gullin - Verification Code', 'send_email_verification_code', ctx)
+		send_email([user.email], 'Gullin - Welcome! Please Verify Your Email', 'welcome_and_email_verification', ctx)
 
 		# Get user auth token
 		payload = jwt_settings.JWT_PAYLOAD_HANDLER(user)
@@ -100,11 +101,16 @@ class UserAuthViewSet(viewsets.ViewSet):
 					# Refresh code
 					user.verification_code.refresh()
 					# Send to code user
+					# Send user verification email when user register
+					verification_code = user.verification_code
+					verification_code.refresh()
 					ctx = {
-						'full_name'        : user.investor.full_name,
-						'verification_code': user.verification_code.code
+						'user_full_name'   : user.investor.full_name,
+						'verification_code': verification_code.code,
+						'user_email'       : user.email
 					}
-					send_email([user.email], 'Gullin - Verification Code', 'send_email_verification_code', ctx)
+					send_email([user.email], 'Gullin - Welcome! Please Verify Your Email', 'welcome_and_email_verification', ctx)
+
 					msg = {'data': 'We have sent a verification code to your email, please verify.'}
 
 				else:
@@ -378,10 +384,11 @@ class UserViewSet(viewsets.ViewSet):
 			verification_code = request.user.verification_code
 			verification_code.refresh()
 			ctx = {
-				'full_name'        : request.user.investor.full_name,
-				'verification_code': verification_code.code
+				'user_full_name'   : request.user.investor.full_name,
+				'verification_code': verification_code.code,
+				'user_email'       : request.user.email
 			}
-			send_email([request.user.email], 'Gullin - Verification Code', 'send_email_verification_code', ctx)
+			send_email([request.user.email], 'Gullin - Verification Code', 'verification_code', ctx)
 			return Response(status=status.HTTP_200_OK)
 
 		elif request.data.get('sms'):
