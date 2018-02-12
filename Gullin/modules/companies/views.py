@@ -5,8 +5,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.parsers import FormParser, JSONParser
 
-from .serializers import ListCompanySerializer, FullCompanySerializer
-from .models import Company, CompanyMember, TokenDetail
+from .serializers import ListCompanySerializer, FullCompanySerializer, FullPressReleaseSerializer
+from .models import Company, PressRelease
 
 
 class CompanyViewSet(viewsets.ViewSet):
@@ -30,7 +30,6 @@ class CompanyViewSet(viewsets.ViewSet):
 		return Response(serializer.data)
 
 	def detail(self, request, id):
-
 		try:
 			company = Company.objects.filter(id=id).first()
 			if company:
@@ -47,3 +46,9 @@ class CompanyViewSet(viewsets.ViewSet):
 				return Response(serializer.data)
 
 		return Response(status=status.HTTP_404_NOT_FOUND)
+
+	def press_releases(self, request):
+		# TODO: Pagination
+		press_releases = PressRelease.objects.all()
+		serializer = FullPressReleaseSerializer(press_releases, many=True)
+		return Response(serializer.data)
