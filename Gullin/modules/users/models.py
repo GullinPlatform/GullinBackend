@@ -1,6 +1,7 @@
 import random
 import string
 from datetime import timedelta
+from storages.backends.s3boto3 import S3Boto3Storage
 
 from django.db import models
 from django.db.models.signals import post_save
@@ -236,7 +237,6 @@ class InvestorUserAddress(models.Model):
 	class Meta:
 		verbose_name_plural = '3. Investor User Address'
 
-
 	def __str__(self):
 		return self.investor_user.full_name + ' Address'
 
@@ -251,9 +251,9 @@ class IDVerification(models.Model):
 	                   ('passport', 'Passport'))
 	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
-	official_id_front = models.FileField(upload_to=official_id_dir)
-	official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True)
-	user_holding_official_id = models.FileField(upload_to=official_id_dir)
+	official_id_front = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
+	official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
+	user_holding_official_id = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 
 	nationality = models.CharField(max_length=20, null=True, blank=True)
 
@@ -270,36 +270,34 @@ class IDVerification(models.Model):
 	def __str__(self):
 		return self.official_id_type
 
-	def verify_identity(self):
-		# cache
-		investor = self.investor_user
-		# update verification status
-		self.is_verified = True
-		# sync nationality (this is for users who use different country phone number when register,
-		# when we manually check user identity, we have to update user nationality on the admin portal and sync with investor user model)
-		# TODO: make sure nationality format is same everywhere
-		investor.nationality = self.nationality
-		# update user verification level
-		investor.verification_level = 4
-		# save
-		self.save()
-		investor.save()
 
-	# TODO: send email to user for the status updating
-
-	def unverify_identity(self):
-		# cache
-		investor = self.investor_user
-		# update verification status
-		self.is_verified = True
-		# update user verification level
-		investor.verification_level = 2
-		# save
-		self.save()
-		investor.save()
-
-
-# TODO: send email to user for the status updating
+# def verify_identity(self):
+# 	# cache
+# 	investor = self.investor_user
+# 	# update verification status
+# 	self.is_verified = True
+# 	# sync nationality (this is for users who use different country phone number when register,
+# 	# when we manually check user identity, we have to update user nationality on the admin portal and sync with investor user model)
+# 	# TODO: make sure nationality format is same everywhere
+# 	investor.nationality = self.nationality
+# 	# update user verification level
+# 	investor.verification_level = 4
+# 	# save
+# 	self.save()
+# 	# TODO: send email to user for the status updating
+# 	investor.save()
+#
+# def unverify_identity(self):
+# 	# cache
+# 	investor = self.investor_user
+# 	# update verification status
+# 	self.is_verified = True
+# 	# update user verification level
+# 	investor.verification_level = 2
+# 	# save
+# 	self.save()
+# 	# TODO: send email to user for the status updating
+# 	investor.save()
 
 
 class InvestorVerification(models.Model):
@@ -311,8 +309,8 @@ class InvestorVerification(models.Model):
 	               ('Bank Statement', 'Bank Statement'))
 
 	doc_type = models.CharField(max_length=20, choices=DOC_CHOICES)
-	doc1 = models.FileField(upload_to=official_id_dir, null=True, blank=True)
-	doc2 = models.FileField(upload_to=official_id_dir, null=True, blank=True)
+	doc1 = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
+	doc2 = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 
 	class Meta:
 		verbose_name_plural = '5. Accredited Investor Verifications'
