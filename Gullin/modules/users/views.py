@@ -323,7 +323,6 @@ class UserViewSet(viewsets.ViewSet):
 			# Update Address
 			if request.data.get('update') == 'address':
 				# Check content
-
 				if request.user.investor.address:
 					address = request.user.investor.address
 					address.address1 = request.data['address1']
@@ -339,7 +338,7 @@ class UserViewSet(viewsets.ViewSet):
 					                                             city=request.data['city'],
 					                                             state=request.data['state'],
 					                                             zipcode=request.data['zipcode'],
-					                                             country=request.user.investor.nationality, )
+					                                             country=request.user.investor.nationality)
 					request.user.investor.address = address
 					request.user.investor.save()
 				serializer = FullInvestorUserSerializer(request.user.investor)

@@ -157,20 +157,20 @@ class IDVerificationAdmin(admin.ModelAdmin):
 		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_back', 'user_holding_official_id',)}),
 		('Nationality', {'fields': ('nationality',)}),
 		('Verify', {'fields': ('is_verified',)}),
-		('Action', {'fields': ('verify_identity', 'unverify_identity')}),
+		# ('Action', {'fields': ('verify_identity', 'unverify_identity')}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
-	readonly_fields = ('created', 'updated', 'edit_investor_user', 'verify_identity', 'unverify_identity')
+	readonly_fields = ('created', 'updated', 'edit_investor_user')
 
 	def edit_investor_user(self, obj):
 		change_url = reverse('admin:users_investoruser_change', args=(obj.investor_user.id,))
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.investor_user.full_name))
 
-	def verify_identity(self, obj):
-		return obj.verify_identity()
-
-	def unverify_identity(self, obj):
-		return obj.unverify_identity()
+	# def verify_identity(self, obj):
+	# 	return obj.verify_identity()
+	#
+	# def unverify_identity(self, obj):
+	# 	return obj.unverify_identity()
 
 
 @admin.register(InvestorVerification)

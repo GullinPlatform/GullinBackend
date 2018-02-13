@@ -3,16 +3,15 @@ import string
 
 
 def random_string():
-	return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(10)])
+	return ''.join([random.choice(string.ascii_letters + string.digits) for n in range(20)])
 
 
 def _filename(instance, filename, _prefix):
 	_post_fix = random_string()
-	_instance_id = instance.id
 	file_name = filename.lower().split('.')[0][:5]
 	file_extension = filename.split('.')[-1]
 
-	return '%s/%s/%s.%s.%s' % (_instance_id, _prefix, file_name, _post_fix, file_extension)
+	return '%s/%s.%s.%s' % (_prefix, file_name, _post_fix, file_extension)
 
 
 def user_avatar_dir(instance, filename):
