@@ -29,7 +29,7 @@ class UserAdmin(BaseUserAdmin):
 	# Detail Page Settings
 	fieldsets = (
 		('User Info', {'fields': ('email', 'phone_country_code', 'phone', 'password',)}),
-		('User Extension', {'fields': ('edit_investor', 'edit_company_user', 'edit_analyst')}),
+		('User Extension', {'fields': ('edit_investor',)}),
 		('Permissions', {'fields': ('is_investor', 'is_company_user', 'is_analyst', 'is_active', 'is_staff',)}),
 		('Security', {'fields': ('last_login', 'last_login_ip', 'TOTP_enabled',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
@@ -37,7 +37,7 @@ class UserAdmin(BaseUserAdmin):
 	readonly_fields = ('created', 'updated',
 	                   'last_login', 'last_login_ip', 'TOTP_enabled',
 	                   'is_investor', 'is_company_user', 'is_analyst', 'is_active', 'is_staff',
-	                   'edit_investor', 'edit_company_user', 'edit_analyst',)
+	                   'edit_investor')
 
 	def edit_investor(self, obj):
 		if obj.is_investor:
@@ -46,19 +46,19 @@ class UserAdmin(BaseUserAdmin):
 		else:
 			return '-'
 
-	def edit_company_user(self, obj):
-		if obj.is_company:
-			change_url = reverse('admin:users_companyuser_change', args=(obj.company_user.id,))
-			return mark_safe('<a href="%s">%s</a>' % (change_url, obj.company_user))
-		else:
-			return '-'
-
-	def edit_analyst(self, obj):
-		if obj.is_analyst:
-			change_url = reverse('admin:users_user_change', args=(obj.analyst.id,))
-			return mark_safe('<a href="%s">%s</a>' % (change_url, obj.analyst.full_name))
-		else:
-			return '-'
+	# def edit_company_user(self, obj):
+	# 	if obj.is_company:
+	# 		change_url = reverse('admin:users_companyuser_change', args=(obj.company_user.id,))
+	# 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.company_user))
+	# 	else:
+	# 		return '-'
+	#
+	# def edit_analyst(self, obj):
+	# 	if obj.is_analyst:
+	# 		change_url = reverse('admin:users_user_change', args=(obj.analyst.id,))
+	# 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.analyst.full_name))
+	# 	else:
+	# 		return '-'
 
 
 @admin.register(InvestorUser)
