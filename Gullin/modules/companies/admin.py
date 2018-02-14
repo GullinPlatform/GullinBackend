@@ -34,7 +34,7 @@ class CompanyMemberAdmin(admin.ModelAdmin):
 		('Company Info', {'fields': ('company',)}),
 		('Member Type', {'fields': ('member_type',)}),
 		('Member Detail', {'fields': ('avatar', 'first_name', 'last_name', 'title', 'description',)}),
-		('Social Media', {'fields': ('facebook', 'linkedin','website')}),
+		('Social Media', {'fields': ('facebook', 'linkedin', 'website')}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
 	readonly_fields = ('created', 'updated',)
@@ -69,7 +69,7 @@ class TokenDetailAdmin(admin.ModelAdmin):
 		('ICO Type', {'fields': ('ico_token_type', 'ico_stage_type',)}),
 		('ICO Time', {'fields': ('start_datetime', 'end_datetime', 'is_finished')}),
 		('Tokenomics', {'fields': ('price', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution')}),
-		('Investment', {'fields': ('threshold', 'restrictions', 'bonus',)}),
+		('Investment', {'fields': ('threshold', 'restrictions', 'restricted_country_list', 'bonus',)}),
 		('Smart Contract Info', {'fields': ('crowd_sale_contract_address', 'token_address', 'decimals',)}),
 		('ICO Stage', {'fields': ('is_finished',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),

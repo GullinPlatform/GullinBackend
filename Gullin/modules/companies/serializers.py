@@ -10,7 +10,7 @@ class FullTokenDetailSerializer(serializers.ModelSerializer):
 		          'start_datetime', 'end_datetime', 'is_finished',
 		          'ico_token_type', 'ico_stage_type',
 		          'price', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution',
-		          'threshold', 'restrictions', 'bonus',
+		          'threshold', 'restrictions', 'bonus', 'restricted_country_list',
 		          'crowd_sale_contract_address', 'token_address', 'decimals',
 		          'created', 'updated',)
 		read_only_fields = ('contract_address', 'created', 'updated',)

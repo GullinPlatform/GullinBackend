@@ -38,7 +38,7 @@ class Company(models.Model):
 
 	class Meta:
 		verbose_name = 'Company'
-		verbose_name_plural = 'Companies'
+		verbose_name_plural = '1. Companies'
 
 	def __str__(self):
 		return self.name
@@ -87,6 +87,7 @@ class TokenDetail(models.Model):
 	threshold = models.FloatField(null=True, blank=True)
 	restrictions = models.TextField(null=True, blank=True)
 	bonus = models.TextField(null=True, blank=True)
+	restricted_country_list = models.TextField(default='[]')
 
 	# Smart Contract Info
 	crowd_sale_contract_address = models.CharField(max_length=200, null=True, blank=True)
@@ -99,6 +100,9 @@ class TokenDetail(models.Model):
 
 	def __str__(self):
 		return self.token_code
+
+	class Meta:
+		verbose_name_plural = '5. Token Details'
 
 
 # def ico_percentage(self):
@@ -123,6 +127,9 @@ class PressRelease(models.Model):
 
 	def __str__(self):
 		return self.company.name + ' ' + self.title
+
+	class Meta:
+		verbose_name_plural = '4. Company Press Peleases'
 
 
 class CompanyMember(models.Model):
@@ -162,6 +169,9 @@ class CompanyMember(models.Model):
 	def full_name(self):
 		return self.first_name + ' ' + self.last_name
 
+	class Meta:
+		verbose_name_plural = '2. Company Members'
+
 
 class Document(models.Model):
 	# Company
@@ -176,3 +186,6 @@ class Document(models.Model):
 
 	def __str__(self):
 		return self.company.name + ' ' + self.title
+
+	class Meta:
+		verbose_name_plural = '3. Company Documents'
