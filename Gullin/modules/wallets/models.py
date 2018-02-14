@@ -22,6 +22,9 @@ class Balance(models.Model):
 	# TimeStamp
 	updated = models.DateTimeField(auto_now=True)
 
+	class Meta:
+		verbose_name_plural = '2. Balances'
+
 	def __str__(self):
 		return str(self.wallet) + ' balance'
 
@@ -39,6 +42,9 @@ class Wallet(models.Model):
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
 	created_eth_block_num = models.IntegerField(default=5000000)
+
+	class Meta:
+		verbose_name_plural = '1. Wallets'
 
 	def __str__(self):
 		return self.investor_user.full_name + ' wallet'
@@ -82,6 +88,9 @@ class Transaction(models.Model):
 	value_unit = models.CharField(max_length=10)
 	tx_fee = models.FloatField()
 	tx_hash = models.CharField(max_length=100, null=True, blank=True, unique=True)
+
+	class Meta:
+		verbose_name_plural = '3. Transactions'
 
 	def __str__(self):
 		return 'Transaction of ' + str(self.wallet)
