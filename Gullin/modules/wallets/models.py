@@ -13,7 +13,7 @@ class Balance(models.Model):
 	which means the balance on backend is NOT always up-to-date
 	"""
 	# Link to Wallet
-	wallet = models.ForeignKey('Wallet', related_name='balances', on_delete=models.PROTECT)
+	wallet = models.ForeignKey('Wallet', related_name='balances', on_delete=models.CASCADE)
 
 	# Balance Info
 	token = models.ForeignKey('companies.TokenDetail', related_name='balances', on_delete=models.PROTECT)
