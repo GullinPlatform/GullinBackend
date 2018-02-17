@@ -91,6 +91,7 @@ class Transaction(models.Model):
 
 	class Meta:
 		verbose_name_plural = '3. Transactions'
+		ordering = ['-datetime']
 
 	def __str__(self):
 		return 'Transaction of ' + str(self.wallet)
