@@ -205,7 +205,7 @@ class VerificationCodeAdmin(admin.ModelAdmin):
 @admin.register(UserLog)
 class UserLogAdmin(admin.ModelAdmin):
 	# List display Settings
-	list_display = ('user', 'type', 'ip', 'datetime',)
+	list_display = ('user', 'action', 'ip', 'datetime',)
 	search_fields = ('user',)
 	# list_filter = ('is_expired',)
 	ordering = ('datetime',)
@@ -213,9 +213,9 @@ class UserLogAdmin(admin.ModelAdmin):
 	# Detail Page Settings
 	fieldsets = (
 		('Base User', {'fields': ('edit_user',)}),
-		('Info', {'fields': ('type', 'ip', 'device', 'datetime',)}),
+		('Info', {'fields': ('action', 'ip', 'device', 'datetime',)}),
 	)
-	readonly_fields = ('type', 'ip', 'device', 'datetime',)
+	readonly_fields = ('action', 'ip', 'device', 'datetime',)
 
 	def edit_user(self, obj):
 		change_url = reverse('admin:users_user_change', args=(obj.user.id,))

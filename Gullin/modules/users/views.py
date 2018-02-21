@@ -1,14 +1,14 @@
 from django.utils import timezone
 from django.db.utils import IntegrityError
+from django.contrib.gis.geoip2 import GeoIP2
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
 
 from Gullin.utils.rest_framework_jwt.serializers import JSONWebTokenSerializer, RefreshJSONWebTokenSerializer
 from Gullin.utils.rest_framework_jwt.settings import api_settings as jwt_settings
-from Gullin.utils.rest_framework_jwt.utils import jwt_return_auth_token
 
 from Gullin.utils.get_client_ip import get_client_ip
 from Gullin.utils.validate_country_code import is_valid_country, get_code_by_country_name
@@ -16,7 +16,7 @@ from Gullin.utils.send.email import send_email
 from Gullin.utils.send.sms import send_sms
 
 from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer
-from .models import InvestorUser, User, InvestorUserAddress
+from .models import InvestorUser, User, InvestorUserAddress, UserLog
 from ..wallets.models import Wallet
 
 
@@ -81,44 +81,88 @@ class UserAuthViewSet(viewsets.ViewSet):
 			serializer = JSONWebTokenSerializer(data=request.data)
 			# If login successful
 			if serializer.is_valid():
-				# Save user and token to session
+				# get user instance and ip
 				user = serializer.object.get('user')
-				request.session['user'] = user.id
+				auth_token = serializer.object.get('token')
+				user_ip = get_client_ip(request)
+
+				# if user logged in form a old ip
+				if user_ip == user.last_login_ip:
+					# Update user last login timestamp and last login IP
+					user.update_last_login()
+					user.update_last_login_ip(user_ip)
+
+					# Generate Log
+					UserLog.objects.create(user_id=user.id,
+					                       ip=user_ip,
+					                       action='Login Successful',
+					                       device=request.META['HTTP_USER_AGENT'])
+					# Generate Response
+					# Add user to the response data
+					serializer = FullInvestorUserSerializer(user.investor)
+					response = Response(serializer.data, status=status.HTTP_200_OK)
+					# Add cookie to the response data
+					response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,
+					                    auth_token,
+					                    expires=(timezone.now() + jwt_settings.JWT_EXPIRATION_DELTA),
+					                    httponly=True)
+					return response
+
+				# else go to 2 factor auth
+				# Save user and token to session
+				request.session['user_id'] = user.id
 				request.session['auth_token'] = serializer.object.get('token')
 
 				# Start 2 factor auth code
 				# If user not enabled TOTP
-				if not user.TOTP_enabled and user.phone:
-					# Refresh code
-					user.verification_code.refresh()
-					# Send to code user
-					phone_num = user.phone_country_code + user.phone
-					send_sms(phone_num,
-					         'Verification Code: ' + user.verification_code.code + '\nInvalid in 5 minutes.')
-					msg = {'data': 'We have sent a verification code to your phone, please verify.'}
+				if not user.TOTP_enabled:
+					# Make sure user has phone number
+					if user.phone:
+						# Refresh code
+						user.verification_code.refresh()
+						# Send sms
+						phone_num = user.phone_country_code + user.phone
+						send_sms(phone_num,
+						         'Verification Code: ' + user.verification_code.code + '\nInvalid in 5 minutes.')
+						msg = {'data': 'We have sent a verification code to your phone, please verify.'}
+					# Else send 2-factor to users email
+					else:
+						# Refresh code
+						user.verification_code.refresh()
+						# Send email
+						verification_code = user.verification_code
+						verification_code.refresh()
+						ctx = {
+							'user_full_name'   : user.investor.full_name,
+							'verification_code': verification_code.code,
+							'user_email'       : user.email
+						}
+						send_email([user.email], 'Gullin - Welcome! Please Verify Your Email', 'welcome_and_email_verification', ctx)
+
+						msg = {'data': 'We have sent a verification code to your email, please verify.'}
 				# If user enabled TOTP
-				elif not user.TOTP_enabled and user.email:
-					# Refresh code
-					user.verification_code.refresh()
-					# Send to code user
-					# Send user verification email when user register
-					verification_code = user.verification_code
-					verification_code.refresh()
-					ctx = {
-						'user_full_name'   : user.investor.full_name,
-						'verification_code': verification_code.code,
-						'user_email'       : user.email
-					}
-					send_email([user.email], 'Gullin - Welcome! Please Verify Your Email', 'welcome_and_email_verification', ctx)
-
-					msg = {'data': 'We have sent a verification code to your email, please verify.'}
-
 				else:
 					# TODO: work with TOTP clients
 					msg = {'data': 'Please verify using your 2 factor authenticator.'}
 					pass
 
-				# TODO: generate log
+				# Generate Log
+				UserLog.objects.create(user_id=user.id,
+				                       ip=get_client_ip(request),
+				                       action='Login Successful (Need 2 Factor Auth)',
+				                       device=request.META['HTTP_USER_AGENT'])
+				# Send Warning Email
+				g = GeoIP2()
+				city = g.city(user_ip)
+				location = city.get('city') + ', ' + city.get('country_name')
+				ctx = {
+					'user_full_name': user.investor.full_name,
+					'user_ip'       : user_ip,
+					'user_location' : location,
+					'user_device'   : request.META['HTTP_USER_AGENT'],
+				}
+				send_email([user.email], 'Gullin - Login from a different IP', 'different_ip_login_notice', ctx)
+
 				return Response(msg, status=status.HTTP_200_OK)
 			else:
 				return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -126,9 +170,9 @@ class UserAuthViewSet(viewsets.ViewSet):
 		# Verify 2 Factor code
 		elif request.method == 'PATCH':
 			# check session
-			if request.session.get('user') and request.session.get('auth_token'):
+			if request.session.get('user_id') and request.session.get('auth_token'):
 				# retrieve data from session
-				user = User.objects.get(id=request.session['user'])
+				user = User.objects.get(id=request.session['user_id'])
 				token = request.session['auth_token']
 
 				# Check verifications code
@@ -154,13 +198,17 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 				# Clear session
 				request.session.clear()
-				# TODO: generate log
+				user_ip = get_client_ip(request)
 
-				# Update user last login timestamp
+				# Update user last login timestamp and last login IP
 				user.update_last_login()
+				user.update_last_login_ip(user_ip)
 
-				# Update user last login IP
-				user.update_last_login_ip(get_client_ip(request))
+				# Generate Log
+				UserLog.objects.create(user_id=user.id,
+				                       ip=user_ip,
+				                       action='2 Factor Auth Successful',
+				                       device=request.META['HTTP_USER_AGENT'])
 
 				# Generate Response
 				# Add user to the response data

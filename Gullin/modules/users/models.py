@@ -352,8 +352,8 @@ class UserLog(models.Model):
 	"""
 	UserLog Code model
 	"""
-	user = models.ForeignKey('User', related_name='logs', on_delete=models.PROTECT)
-	type = models.CharField(max_length=200)
+	user = models.ForeignKey('User', related_name='logs', on_delete=models.CASCADE)
+	action = models.CharField(max_length=200)
 	ip = models.GenericIPAddressField()
 	device = models.CharField(max_length=200)
 	datetime = models.DateField(auto_now_add=True)
