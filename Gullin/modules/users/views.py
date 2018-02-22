@@ -6,6 +6,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.parsers import FormParser, MultiPartParser, JSONParser
+from rest_framework.decorators import api_view
 
 from Gullin.utils.rest_framework_jwt.serializers import JSONWebTokenSerializer, RefreshJSONWebTokenSerializer
 from Gullin.utils.rest_framework_jwt.settings import api_settings as jwt_settings
@@ -418,16 +419,15 @@ class UserViewSet(viewsets.ViewSet):
 				serializer = FullInvestorUserSerializer(request.user.investor)
 				return Response(serializer.data, status=status.HTTP_200_OK)
 
-	def upload_id(self, request):
-		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality'
+	def id_verification(self, request):
+		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'investor_user'
 		serializer = FullIDVerificationSerializer(data=request.data)
 		if serializer.is_valid():
-			id_verification = serializer.save()
+			serializer.save()
+
 			investor = request.user.investor
-			investor.id_verification = id_verification
 			investor.verification_level = 3
 			investor.save()
-
 			return Response(status=status.HTTP_201_CREATED)
 		else:
 			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -459,3 +459,35 @@ class UserViewSet(viewsets.ViewSet):
 
 	def two_factor_auth(self, request):
 		pass
+
+
+@api_view(['GET'])
+def send_kyc_email(request, type, email):
+	if type == 'success':
+		user = User.objects.filter(email=email)
+		if user:
+			user = user[0]
+			ctx = {
+				'user_full_name': user.investor.full_name,
+				'user_email'    : user.email
+			}
+			send_email([user.email], 'Gullin - ID Verification Approved', 'kyc_success', ctx)
+			return Response({'data': 'email send'}, status=status.HTTP_200_OK)
+		else:
+			return Response({'data': 'user invalid'}, status=status.HTTP_200_OK)
+
+	elif type == 'failed':
+		user = User.objects.filter(email=email)
+		if user:
+			user = user[0]
+			ctx = {
+				'user_full_name': user.investor.full_name,
+				'user_email'    : user.email
+			}
+			send_email([user.email], 'Gullin - ID Verification Rejected', 'kyc_failed', ctx)
+			return Response({'data': 'email send'}, status=status.HTTP_200_OK)
+		else:
+			return Response({'data': 'user invalid'}, status=status.HTTP_200_OK)
+
+	else:
+		return Response({'data': 'parameter invalid'}, status=status.HTTP_200_OK)
