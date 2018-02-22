@@ -73,14 +73,28 @@ class InvestorUserAdmin(admin.ModelAdmin):
 	fieldsets = (
 		('Base User', {'fields': ('edit_user',)}),
 		('User Info', {'fields': ('first_name', 'last_name', 'birthday', 'nationality', 'address',)}),
-		('Verification', {'fields': ('verification_level', 'id_verification', 'accredited_investor_verification',)}),
+		('Verification', {'fields': ('verification_level', 'id_verification_link', 'accredited_investor_verification_link',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
-	readonly_fields = ('created', 'updated', 'edit_user')
+	readonly_fields = ('created', 'updated', 'edit_user', 'id_verification_link', 'accredited_investor_verification_link',)
 
 	def edit_user(self, obj):
 		change_url = reverse('admin:users_user_change', args=(obj.user.id,))
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.user.email))
+
+	def id_verification_link(self, obj):
+		if obj.id_verification:
+			change_url = reverse('admin:users_idverification_change', args=(obj.id_verification.id,))
+			return mark_safe('<a href="%s">%s</a>' % (change_url, 'ID Verification'))
+		else:
+			return '-'
+
+	def accredited_investor_verification_link(self, obj):
+		if obj.id_verification:
+			change_url = reverse('admin:users_accreditedinvestorverification_change', args=(obj.accredited_investor_verification.id,))
+			return mark_safe('<a href="%s">%s</a>' % (change_url, 'Accredited Investor Verification'))
+		else:
+			return '-'
 
 
 # @admin.register(AnalystUser)
@@ -153,15 +167,15 @@ class IDVerificationAdmin(admin.ModelAdmin):
 
 	# Detail Page Settings
 	fieldsets = (
-		('Base User', {'fields': ('edit_investor_user',)}),
+		('Base User', {'fields': ('investor_user', 'investor_user_link')}),
 		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_back', 'user_holding_official_id',)}),
 		('Nationality', {'fields': ('nationality',)}),
 		('Verify', {'fields': ('is_verified', 'note')}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
-	readonly_fields = ('created', 'updated', 'edit_investor_user')
+	readonly_fields = ('created', 'updated', 'investor_user_link')
 
-	def edit_investor_user(self, obj):
+	def investor_user_link(self, obj):
 		change_url = reverse('admin:users_investoruser_change', args=(obj.investor_user.id,))
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.investor_user.full_name))
 
@@ -200,7 +214,7 @@ class UserLogAdmin(admin.ModelAdmin):
 	# List display Settings
 	list_display = ('user', 'action', 'ip', 'datetime',)
 	search_fields = ('user',)
-	ordering = ('datetime',)
+	ordering = ('-datetime',)
 
 	# Detail Page Settings
 	fieldsets = (
