@@ -6,13 +6,13 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from Gullin.utils.upload_dir import user_avatar_dir, official_id_dir
-
-from django.utils import timezone
+from Gullin.utils.send.email import send_email
 
 
 class UserManager(BaseUserManager):
@@ -374,3 +374,16 @@ class UserLog(models.Model):
 def add_verification_code_to_user(sender, **kwargs):
 	if kwargs.get('created', True):
 		VerificationCode.objects.create(user=kwargs.get('instance'))
+
+
+# Signal handling function to send email to user when user create new kyc application
+@receiver(post_save, sender=IDVerification)
+def id_verification_processing_email(sender, **kwargs):
+	if kwargs.get('created', True):
+		id_verification = kwargs.get('instance')
+		user = id_verification.investor_user.user
+		ctx = {
+			'user_full_name': user.investor.full_name,
+			'user_email'    : user.email
+		}
+		send_email([user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
