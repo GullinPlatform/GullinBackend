@@ -143,8 +143,6 @@ class InvestorUser(models.Model):
 
 	# Verification
 	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1)
-	id_verification = models.OneToOneField('IDVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
-	accredited_investor_verification = models.OneToOneField('InvestorVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -247,6 +245,9 @@ class IDVerification(models.Model):
 	ID_TYPE_CHOICES = (('driver_license', 'Driver License'),
 	                   ('photo_id', 'Photo ID'),
 	                   ('passport', 'Passport'))
+
+	investor_user = models.OneToOneField('InvestorUser', related_name='id_verification', on_delete=models.CASCADE, null=True, blank=True)
+
 	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
 	official_id_front = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
@@ -259,7 +260,7 @@ class IDVerification(models.Model):
 	is_verified = models.BooleanField(default=False)
 
 	# Note
-	note = models.TextField(null=True)
+	note = models.TextField(null=True, blank=True)
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -308,6 +309,8 @@ class InvestorVerification(models.Model):
 
 	DOC_CHOICES = (('Tax Return', 'Tax Return'),
 	               ('Bank Statement', 'Bank Statement'))
+
+	investor_user = models.OneToOneField('InvestorUser', related_name='accredited_investor_verification', on_delete=models.CASCADE, null=True, blank=True)
 
 	doc_type = models.CharField(max_length=20, choices=DOC_CHOICES)
 	doc1 = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
