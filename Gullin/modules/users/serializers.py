@@ -65,7 +65,7 @@ class FullInvestorUserSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = InvestorUser
-		fields = ('user',
+		fields = ('id', 'user',
 		          'first_name', 'last_name', 'birthday', 'nationality', 'address',
 		          'verification_level', 'id_verification', 'accredited_investor_verification',
 		          'created', 'updated',)
@@ -94,7 +94,9 @@ class FullAnalystUserSerializer(serializers.ModelSerializer):
 class FullIDVerificationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = IDVerification
-		fields = ('official_id_type', 'official_id_back', 'official_id_front', 'user_holding_official_id', 'nationality', 'created', 'updated',)
+		fields = ('investor_user',
+		          'official_id_type', 'official_id_back', 'official_id_front', 'user_holding_official_id',
+		          'nationality', 'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
 
 

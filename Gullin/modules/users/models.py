@@ -6,13 +6,13 @@ from storages.backends.s3boto3 import S3Boto3Storage
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from Gullin.utils.upload_dir import user_avatar_dir, official_id_dir
-
-from django.utils import timezone
+from Gullin.utils.send.email import send_email
 
 
 class UserManager(BaseUserManager):
@@ -114,10 +114,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 		self.save(update_fields=['last_login'])
 
 	def update_last_login_ip(self, ip):
-		if self.last_login_ip and ip != self.last_login_ip:
-			# TODO: Block User Login
-			# TODO: Send email
-			self.last_login_ip = ip
+		self.last_login_ip = ip
+		self.save(update_fields=['last_login_ip'])
 
 
 class InvestorUser(models.Model):
@@ -145,8 +143,6 @@ class InvestorUser(models.Model):
 
 	# Verification
 	verification_level = models.IntegerField(choices=LEVEL_CHOICES, default=-1)
-	id_verification = models.OneToOneField('IDVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
-	accredited_investor_verification = models.OneToOneField('InvestorVerification', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -249,6 +245,9 @@ class IDVerification(models.Model):
 	ID_TYPE_CHOICES = (('driver_license', 'Driver License'),
 	                   ('photo_id', 'Photo ID'),
 	                   ('passport', 'Passport'))
+
+	investor_user = models.OneToOneField('InvestorUser', related_name='id_verification', on_delete=models.CASCADE, null=True, blank=True)
+
 	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
 	official_id_front = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
@@ -259,6 +258,9 @@ class IDVerification(models.Model):
 
 	# Identifier
 	is_verified = models.BooleanField(default=False)
+
+	# Note
+	note = models.TextField(null=True, blank=True)
 
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
@@ -308,6 +310,8 @@ class InvestorVerification(models.Model):
 	DOC_CHOICES = (('Tax Return', 'Tax Return'),
 	               ('Bank Statement', 'Bank Statement'))
 
+	investor_user = models.OneToOneField('InvestorUser', related_name='accredited_investor_verification', on_delete=models.CASCADE, null=True, blank=True)
+
 	doc_type = models.CharField(max_length=20, choices=DOC_CHOICES)
 	doc1 = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 	doc2 = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
@@ -352,16 +356,15 @@ class UserLog(models.Model):
 	"""
 	UserLog Code model
 	"""
-	user = models.ForeignKey('User', related_name='logs', on_delete=models.PROTECT)
-	type = models.CharField(max_length=200)
+	user = models.ForeignKey('User', related_name='logs', on_delete=models.CASCADE)
+	action = models.CharField(max_length=200)
 	ip = models.GenericIPAddressField()
 	device = models.CharField(max_length=200)
-	datetime = models.DateField(auto_now_add=True)
+	datetime = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
 		verbose_name_plural = '7. User Logs'
 
-	@property
 	def __str__(self):
 		return 'UserLog ' + self.datetime.isoformat()
 
@@ -371,3 +374,16 @@ class UserLog(models.Model):
 def add_verification_code_to_user(sender, **kwargs):
 	if kwargs.get('created', True):
 		VerificationCode.objects.create(user=kwargs.get('instance'))
+
+
+# Signal handling function to send email to user when user create new kyc application
+@receiver(post_save, sender=IDVerification)
+def id_verification_processing_email(sender, **kwargs):
+	if kwargs.get('created', True):
+		id_verification = kwargs.get('instance')
+		user = id_verification.investor_user.user
+		ctx = {
+			'user_full_name': user.investor.full_name,
+			'user_email'    : user.email
+		}
+		send_email([user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)

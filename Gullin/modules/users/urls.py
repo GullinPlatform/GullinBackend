@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import UserAuthViewSet, UserSignUpFollowUpViewSet, UserViewSet
+from .views import UserAuthViewSet, UserSignUpFollowUpViewSet, UserViewSet, send_kyc_email
 
 user_login = UserAuthViewSet.as_view({
 	'post' : 'log_in',
@@ -41,8 +41,8 @@ user_me = UserViewSet.as_view({
 	'patch': 'me',
 })
 
-user_upload_id = UserViewSet.as_view({
-	'post': 'upload_id'
+user_id_verification = UserViewSet.as_view({
+	'post': 'id_verification'
 })
 
 urlpatterns = [
@@ -56,7 +56,9 @@ urlpatterns = [
 	path('followup/resend/', user_resend_verification_code, name='user_resend_verification_code'),
 	path('followup/wallet_address/', user_wallet_address, name='user_wallet_address'),
 
-	path('verify/upload_id/', user_upload_id, name='user_upload_id'),
+	path('verify/upload_id/', user_id_verification, name='user_id_verification'),
 
 	path('me/', user_me, name='user_me'),
+
+	path('send_kyc_email/<type>/<email>', send_kyc_email)
 ]

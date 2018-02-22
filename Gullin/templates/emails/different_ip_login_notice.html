@@ -23,7 +23,7 @@
 
     <!-- All other clients get the webfont reference; some will render the font and others will silently fail to the fallbacks. More on that here: http://stylecampaign.com/blog/2015/02/webfont-support-in-email/ -->
     <!--[if !mso]><!-->
-        <link href="https://fonts.googleapis.com/css?family=Montserrat:300,500" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,500" rel="stylesheet">
     <!--<![endif]-->
 
     <!-- Web Font / @font-face : END -->
@@ -49,7 +49,7 @@
 
         /* What it does: Centers email on Android 4.4 */
         div[style*="margin: 16px 0"] {
-            margin:0 !important;
+            margin: 0 !important;
         }
 
         /* What it does: Stops Outlook from adding extra spacing to tables. */
@@ -66,18 +66,19 @@
             table-layout: fixed !important;
             margin: 0 auto !important;
         }
+
         table table table {
             table-layout: auto;
         }
 
         /* What it does: Uses a better rendering method when resizing images in IE. */
         img {
-            -ms-interpolation-mode:bicubic;
+            -ms-interpolation-mode: bicubic;
         }
 
         /* What it does: A work-around for email clients meddling in triggered links. */
-        *[x-apple-data-detectors],  /* iOS */
-        .x-gmail-data-detectors,    /* Gmail */
+        *[x-apple-data-detectors], /* iOS */
+        .x-gmail-data-detectors, /* Gmail */
         .x-gmail-data-detectors *,
         .aBn {
             border-bottom: 0 !important;
@@ -95,10 +96,11 @@
             display: none !important;
             opacity: 0.01 !important;
         }
+
         /* If the above doesn't work, add a .g-img class to any image in question. */
         img.g-img + div {
-            display:none !important;
-           }
+            display: none !important;
+        }
 
         /* What it does: Prevents underlining the button text in Windows 10 */
         .button-link {
@@ -108,7 +110,8 @@
         /* What it does: Removes right gutter in Gmail iOS app: https://github.com/TedGoas/Cerberus/issues/89  */
         /* Create one of these media queries for each additional viewport size you'd like to fix */
         /* Thanks to Eric Lepetit @ericlepetitsf) for help troubleshooting */
-        @media only screen and (min-device-width: 375px) and (max-device-width: 413px) { /* iPhone 6 and 6+ */
+        @media only screen and (min-device-width: 375px) and (max-device-width: 413px) {
+            /* iPhone 6 and 6+ */
             .email-container {
                 min-width: 375px !important;
             }
@@ -124,6 +127,7 @@
         .button-a {
             transition: all 100ms ease-in;
         }
+
         .button-td:hover,
         .button-a:hover {
             background: #555555 !important;
@@ -150,6 +154,7 @@
                 max-width: 100% !important;
                 direction: ltr !important;
             }
+
             /* And center justify these ones. */
             .stack-column-center {
                 text-align: center !important;
@@ -163,6 +168,7 @@
                 margin-right: auto !important;
                 float: none !important;
             }
+
             table.center-on-narrow {
                 display: inline-block !important;
             }
@@ -188,213 +194,219 @@
 
 </head>
 <body width="100%" bgcolor="#F1F1F1" style="margin: 0; mso-line-height-rule: exactly;">
-    <center style="width: 100%; background: #F1F1F1; text-align: left;">
-        <!--
-            Set the email width. Defined in two places:
-            1. max-width for all clients except Desktop Windows Outlook, allowing the email to squish on narrow but never go wider than 680px.
-            2. MSO tags for Desktop Windows Outlook enforce a 680px width.
-            Note: The Fluid and Responsive templates have a different width (600px). The hybrid grid is more "fragile", and I've found that 680px is a good width. Change with caution.
-        -->
-        <div style="max-width: 680px; margin: auto;" class="email-container">
-            <!--[if mso]>
+<center style="width: 100%; background: #F1F1F1; text-align: left;">
+    <!--
+        Set the email width. Defined in two places:
+        1. max-width for all clients except Desktop Windows Outlook, allowing the email to squish on narrow but never go wider than 680px.
+        2. MSO tags for Desktop Windows Outlook enforce a 680px width.
+        Note: The Fluid and Responsive templates have a different width (600px). The hybrid grid is more "fragile", and I've found that 680px is a good width. Change with caution.
+    -->
+    <div style="max-width: 680px; margin: auto;" class="email-container">
+        <!--[if mso]>
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="680" align="center">
             <tr>
             <td>
             <![endif]-->
 
-            <!-- Email Body : BEGIN -->
-            <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 680px;" class="email-container">
+        <!-- Email Body : BEGIN -->
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%" style="max-width: 680px;" class="email-container">
 
 
-                <!-- HEADER : BEGIN -->
-                <tr>
-                    <td bgcolor="#2B2E58">
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                            <tr>
-                                <td style="padding: 40px 40px 20px 15px; text-align: center;">
-                                    <img src="https://i.imgur.com/2WN46IB.png" width="130" height="10" border="0" style="height: auto; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #2B2E58;">
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <!-- HEADER : END -->
+            <!-- HEADER : BEGIN -->
+            <tr>
+                <td bgcolor="#2B2E58">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                            <td style="padding: 40px 40px 20px 15px; text-align: center;">
+                                <img src="https://i.imgur.com/2WN46IB.png" width="130" height="10" border="0"
+                                     style="height: auto; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #2B2E58;">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- HEADER : END -->
 
-                <!-- HERO : BEGIN -->
-                <tr>
-                    <!-- Bulletproof Background Images c/o https://backgrounds.cm -->
-                    <td background="background.png" bgcolor="#ffaa00" align="center" valign="top" style="text-align: center; background-position: center center !important; background-size: cover !important;">
-                        <!--[if gte mso 9]>
+            <!-- HERO : BEGIN -->
+            <tr>
+                <!-- Bulletproof Background Images c/o https://backgrounds.cm -->
+                <td background="background.png" bgcolor="#ffaa00" align="center" valign="top"
+                    style="text-align: center; background-position: center center !important; background-size: cover !important;">
+                    <!--[if gte mso 9]>
                         <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:680px; height:380px; background-position: center center !important;">
                         <v:fill type="tile" src="background.png" color="#222222" />
                         <v:textbox inset="0,0,0,0">
                         <![endif]-->
-                        <div>
-                            <!--[if mso]>
+                    <div>
+                        <!--[if mso]>
                             <table role="presentation" border="0" cellspacing="0" cellpadding="0" align="center" width="500">
                             <tr>
                             <td align="center" valign="middle" width="500">
                             <![endif]-->
-                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="max-width:500px; margin: auto;">
-                                <tr>
-                                  <td align="center" valign="middle">
-                                  <table>
-                                     <tr>
-                                         <td valign="top" style="text-align: center; padding: 20px 0 0 0;">
-                                             <h1 style="margin: 0; font-family: 'Montserrat', sans-serif; font-size: 30px; line-height: 36px; color: #ffffff; font-weight: bold;">Login from Different IP</h1>
-                                         </td>
-                                     </tr>
-
-                                  </table>
-
-                                  </td>
-                                </tr>
-
-                                <tr>
-                                    <td height="20" style="font-size:20px; line-height:20px;">&nbsp;</td>
-                                </tr>
-
-                            </table>
-                            <!--[if mso]>
-                            </td>
-                            </tr>
-                            </table>
-                            <![endif]-->
-                        </div>
-                        <!--[if gte mso 9]>
-                        </v:textbox>
-                        </v:rect>
-                        <![endif]-->
-                    </td>
-                </tr>
-                <!-- HERO : END -->
-
-                <!-- INTRO : BEGIN -->
-                <tr>
-                    <td bgcolor="#ffffff">
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="max-width:500px; margin: auto;">
                             <tr>
-                                <td style="padding: 40px 40px 20px 40px; text-align: left;">
-                                    <h1 style="margin: 0; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #333333; font-weight: normal;">Hi {{user_full_name}},</h1>
-                                </td>
-                            </tr>
-									 <tr>
-                                <td style="padding: 0px 40px 20px 40px; font-family:  sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
-									<p style="margin: 0;">It seems like your account was logged in from a different IP:</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0px 40px 20px 40px; font-family: sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:bold;">
-                                    <p style="margin: 0;">IP: {{ip_address}}</p>
-									 <p style="margin: 0;">Location: {{location}}</p>
-									 <p style="margin: 0;">Device: {{device}}</p>
-                                </td>
-                            </tr>
-	 <tr>
-                                <td style="padding: 0px 40px 20px 40px; font-family:  sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
-									<p style="margin: 0;">If this is not your action, please change your password immediately!</p>
-                                </td>
-                            </tr>
-                           <tr>
-                                <td style="padding: 0px 40px 5px 40px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
-                                    <p style="margin: 0;">Sincerely,</p>
-
-                                </td>
-                            </tr>
-       <tr>
-                                <td style="padding: 0px 40px 40px 40px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
-                                    <p style="margin: 0;">Gullin Team</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <!-- INTRO : END -->
-
-                <!-- CTA : BEGIN -->
-                <tr>
-                    <td bgcolor="#2B2E58">
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                            <tr>
-                                <td style="padding: 40px 40px 5px 40px; text-align: center;">
-                                    <h1 style="margin: 0; font-family: 'Montserrat', sans-serif; font-size: 20px; line-height: 24px; color: #ffffff; font-weight: bold;">IMPORTANT</h1>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0px 40px 20px 40px; font-family: 'Montserrat', sans-serif; font-size: 17px; line-height: 23px; color: #aad4ea; text-align: center; font-weight:normal;">
-                                    <p style="margin: 0;">Gullin will never send or ask you any critical information through email.</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-                <!-- CTA : END -->
-
-                <!-- SOCIAL : BEGIN -->
-                <tr>
-                    <td bgcolor="#292828">
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                            <tr>
-                                <td style="padding: 30px 30px; text-align: center;">
-
-                                    <table align="center" style="text-align: center;">
+                                <td align="center" valign="middle">
+                                    <table>
                                         <tr>
-                                            <td>
-                                                <img src="https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/facebook_online_social_media-32.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
-                                            </td>
-                                            <td width="10">&nbsp;</td>
-                                            <td>
-                                                <img src="https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/online_social_media_twitter-32.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
-                                            </td>
-                                            <td width="10">&nbsp;</td>
-                                            <td>
-                                                <img src="https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/youtube_online_social_media-32.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
-                                            </td>
-                                            <td width="10">&nbsp;</td>
-                                            <td>
-                                                <img src="https://cdn4.iconfinder.com/data/icons/black-white-social-media/32/medium_social_media_logo-32.png" width="" height="" style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
+                                            <td valign="top" style="text-align: center; padding: 20px 0 0 0;">
+                                                <h1 style="margin: 0; font-family: 'Montserrat', sans-serif; font-size: 30px; line-height: 36px; color: #ffffff; font-weight: bold;">Login from
+                                                    Different IP</h1>
                                             </td>
                                         </tr>
+
                                     </table>
 
                                 </td>
                             </tr>
 
-                        </table>
-                    </td>
-                </tr>
-                <!-- SOCIAL : END -->
-
-                <!-- FOOTER : BEGIN -->
-                <tr>
-                    <td bgcolor="#ffffff">
-                        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                             <tr>
-                                <td style="padding: 40px 40px 10px 40px; font-family: sans-serif; font-size: 12px; line-height: 18px; color: #666666; text-align: center; font-weight:normal;">
-                                    <p style="margin: 0;">This email was sent to {{user_email}} | Unsubscribe</p>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0px 40px 40px 40px; font-family: sans-serif; font-size: 12px; line-height: 18px; color: #666666; text-align: center; font-weight:normal;">
-                                    <p style="margin: 0;">Copyright &copy; 2017-2018 <b>Gullin LLC</b>, All Rights Reserved.</p>
-                                </td>
+                                <td height="20" style="font-size:20px; line-height:20px;">&nbsp;</td>
                             </tr>
 
                         </table>
-                    </td>
-                </tr>
-                <!-- FOOTER : END -->
+                        <!--[if mso]>
+                            </td>
+                            </tr>
+                            </table>
+                            <![endif]-->
+                    </div>
+                    <!--[if gte mso 9]>
+                        </v:textbox>
+                        </v:rect>
+                        <![endif]-->
+                </td>
+            </tr>
+            <!-- HERO : END -->
 
-            </table>
-            <!-- Email Body : END -->
+            <!-- INTRO : BEGIN -->
+            <tr>
+                <td bgcolor="#ffffff">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                            <td style="padding: 40px 40px 20px 40px; text-align: left;">
+                                <h1 style="margin: 0; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #333333; font-weight: normal;">Hi {{ user_full_name }},</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 20px 40px; font-family:  sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
+                                <p style="margin: 0;">It seems like your account was logged in from a different IP:</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 20px 40px; font-family: sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:bold;">
+                                <p style="margin: 0;">IP: {{ user_ip }}</p>
+                                <p style="margin: 0;">Location: {{ user_location }}</p>
+                                <p style="margin: 0;">Device: {{ user_device }}</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 20px 40px; font-family:  sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
+                                <p style="margin: 0;">If this is not your action, please change your password immediately!</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 5px 40px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
+                                <p style="margin: 0;">Sincerely,</p>
 
-            <!--[if mso]>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 40px 40px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
+                                <p style="margin: 0;">Gullin Team</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- INTRO : END -->
+
+            <!-- CTA : BEGIN -->
+            <tr>
+                <td bgcolor="#2B2E58">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                            <td style="padding: 40px 40px 5px 40px; text-align: center;">
+                                <h1 style="margin: 0; font-family: 'Montserrat', sans-serif; font-size: 20px; line-height: 24px; color: #ffffff; font-weight: bold;">IMPORTANT</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 20px 40px; font-family: 'Montserrat', sans-serif; font-size: 17px; line-height: 23px; color: #aad4ea; text-align: center; font-weight:normal;">
+                                <p style="margin: 0;">Gullin will never send or ask you any critical information through email.</p>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- CTA : END -->
+
+            <!-- SOCIAL : BEGIN -->
+            <tr>
+                <td bgcolor="#292828">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                            <td style="padding: 30px 30px; text-align: center;">
+                                <table align="center" style="text-align: center;">
+                                    <tr>
+                                        <td>
+                                            <a href="https://www.facebook.com/Gullin.io/">
+                                                <img src="https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/facebook_online_social_media-32.png" width="" height=""
+                                                     style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
+                                            </a>
+                                        </td>
+                                        <td width="10">&nbsp;</td>
+                                        <td>
+                                            <a href="https://twitter.com/Gullin_io">
+                                                <img src="https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/online_social_media_twitter-32.png" width="" height=""
+                                                     style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
+                                            </a>
+                                        </td>
+                                        <td width="10">&nbsp;</td>
+                                        <td>
+                                            <a href="https://medium.com/@Gullin.io">
+                                                <img src="https://cdn4.iconfinder.com/data/icons/black-white-social-media/32/medium_social_media_logo-32.png" width="" height=""
+                                                     style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
+                                            </a>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+            <!-- SOCIAL : END -->
+
+            <!-- FOOTER : BEGIN -->
+            <tr>
+                <td bgcolor="#ffffff">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                            <td style="padding: 40px 40px 10px 40px; font-family: sans-serif; font-size: 12px; line-height: 18px; color: #666666; text-align: center; font-weight:normal;">
+                                <p style="margin: 0;">This email was sent to {{ user_email }} | Unsubscribe</p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 40px 40px; font-family: sans-serif; font-size: 12px; line-height: 18px; color: #666666; text-align: center; font-weight:normal;">
+                                <p style="margin: 0;">Copyright &copy; 2017-2018 <b>Gullin LLC</b>, All Rights Reserved.</p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+            <!-- FOOTER : END -->
+
+        </table>
+        <!-- Email Body : END -->
+
+        <!--[if mso]>
             </td>
             </tr>
             </table>
             <![endif]-->
-        </div>
+    </div>
 
-    </center>
+</center>
 </body>
 </html>
