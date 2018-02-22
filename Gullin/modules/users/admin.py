@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group as BuiltInGroup
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from .models import User, InvestorUser, CompanyUser, AnalystUser, InvestorUserAddress, InvestorVerification, IDVerification, VerificationCode, UserLog
+from .models import User, InvestorUser, InvestorUserAddress, InvestorVerification, IDVerification, VerificationCode, UserLog
 from .forms import UserCreationForm
 
 
@@ -156,8 +156,7 @@ class IDVerificationAdmin(admin.ModelAdmin):
 		('Base User', {'fields': ('edit_investor_user',)}),
 		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_back', 'user_holding_official_id',)}),
 		('Nationality', {'fields': ('nationality',)}),
-		('Verify', {'fields': ('is_verified',)}),
-		# ('Action', {'fields': ('verify_identity', 'unverify_identity')}),
+		('Verify', {'fields': ('is_verified', 'note')}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
 	readonly_fields = ('created', 'updated', 'edit_investor_user')
@@ -165,12 +164,6 @@ class IDVerificationAdmin(admin.ModelAdmin):
 	def edit_investor_user(self, obj):
 		change_url = reverse('admin:users_investoruser_change', args=(obj.investor_user.id,))
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.investor_user.full_name))
-
-	# def verify_identity(self, obj):
-	# 	return obj.verify_identity()
-	#
-	# def unverify_identity(self, obj):
-	# 	return obj.unverify_identity()
 
 
 @admin.register(InvestorVerification)
@@ -207,7 +200,6 @@ class UserLogAdmin(admin.ModelAdmin):
 	# List display Settings
 	list_display = ('user', 'action', 'ip', 'datetime',)
 	search_fields = ('user',)
-	# list_filter = ('is_expired',)
 	ordering = ('datetime',)
 
 	# Detail Page Settings
@@ -215,7 +207,7 @@ class UserLogAdmin(admin.ModelAdmin):
 		('Base User', {'fields': ('edit_user',)}),
 		('Info', {'fields': ('action', 'ip', 'device', 'datetime',)}),
 	)
-	readonly_fields = ('action', 'ip', 'device', 'datetime',)
+	readonly_fields = ('action', 'ip', 'device', 'datetime', 'edit_user',)
 
 	def edit_user(self, obj):
 		change_url = reverse('admin:users_user_change', args=(obj.user.id,))

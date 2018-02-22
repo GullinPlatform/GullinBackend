@@ -100,7 +100,9 @@ class UserAuthViewSet(viewsets.ViewSet):
 					# Generate Response
 					# Add user to the response data
 					serializer = FullInvestorUserSerializer(user.investor)
-					response = Response(serializer.data, status=status.HTTP_200_OK)
+					response_data = serializer.data
+					response_data['data'] = 'success'
+					response = Response(response_data, status=status.HTTP_200_OK)
 					# Add cookie to the response data
 					response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,
 					                    auth_token,
@@ -153,10 +155,14 @@ class UserAuthViewSet(viewsets.ViewSet):
 				                       device=request.META['HTTP_USER_AGENT'])
 				# Send Warning Email
 				g = GeoIP2()
-				city = g.city(user_ip)
-				location = city.get('city') + ', ' + city.get('country_name')
+				try:
+					city = g.city(user_ip)
+					location = city.get('city') + ', ' + city.get('country_name')
+				except:
+					location = 'Unknown'
 				ctx = {
 					'user_full_name': user.investor.full_name,
+					'user_email'    : user.email,
 					'user_ip'       : user_ip,
 					'user_location' : location,
 					'user_device'   : request.META['HTTP_USER_AGENT'],

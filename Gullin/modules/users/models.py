@@ -114,10 +114,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 		self.save(update_fields=['last_login'])
 
 	def update_last_login_ip(self, ip):
-		if self.last_login_ip and ip != self.last_login_ip:
-			# TODO: Block User Login
-			# TODO: Send email
-			self.last_login_ip = ip
+		self.last_login_ip = ip
+		self.save(update_fields=['last_login_ip'])
 
 
 class InvestorUser(models.Model):
@@ -260,6 +258,9 @@ class IDVerification(models.Model):
 	# Identifier
 	is_verified = models.BooleanField(default=False)
 
+	# Note
+	note = models.TextField(null=True)
+
 	# TimeStamp
 	created = models.DateTimeField(auto_now_add=True)
 	updated = models.DateTimeField(auto_now=True)
@@ -356,12 +357,11 @@ class UserLog(models.Model):
 	action = models.CharField(max_length=200)
 	ip = models.GenericIPAddressField()
 	device = models.CharField(max_length=200)
-	datetime = models.DateField(auto_now_add=True)
+	datetime = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
 		verbose_name_plural = '7. User Logs'
 
-	@property
 	def __str__(self):
 		return 'UserLog ' + self.datetime.isoformat()
 
