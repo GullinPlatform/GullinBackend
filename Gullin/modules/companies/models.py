@@ -26,6 +26,8 @@ class Company(models.Model):
 	# Press Releases
 
 	# Social Media
+	youtube = models.URLField(max_length=150, null=True, blank=True)
+	ama = models.URLField(max_length=150, null=True, blank=True)
 	facebook = models.URLField(max_length=150, null=True, blank=True)
 	telegram = models.URLField(max_length=150, null=True, blank=True)
 	slack = models.URLField(max_length=150, null=True, blank=True)
