@@ -16,7 +16,7 @@ from Gullin.utils.validate_country_code import is_valid_country, get_code_by_cou
 from Gullin.utils.send.email import send_email
 from Gullin.utils.send.sms import send_sms
 
-from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer
+from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer, FullUserLogVerificationSerializer
 from .models import InvestorUser, User, InvestorUserAddress, UserLog
 from ..wallets.models import Wallet
 
@@ -459,6 +459,10 @@ class UserViewSet(viewsets.ViewSet):
 
 	def two_factor_auth(self, request):
 		pass
+
+	def log(self, request):
+		serializer = FullUserLogVerificationSerializer(request.user.logs, many=True)
+		return Response(serializer.data)
 
 
 @api_view(['GET'])

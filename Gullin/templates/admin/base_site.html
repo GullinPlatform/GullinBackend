@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+
+{% block title %}
+    Gullin Admin | {{ site_header }}
+{% endblock %}
+
+{% block extrahead %}
+     {{ block.super }}
+    <link rel="icon" type="image/png"  href="/static/favicon/favicon.png"/>
+{% endblock %}
+
+{% block branding %}
+    <h1 id="site-name"><a href="{% url 'admin:index' %}"><b>Gullin Admin Portal</b></a></h1>
+{% endblock %}
+
+{% block welcome-msg %}
+    Welcome,
+    <strong>Admin User</strong>.
+{% endblock %}
+
+{% block userlinks %}
+    <a href="https://gullin.io" target="_blank">Back to site</a> |
+    <a href="{% url 'admin:logout' %}">Log out</a>
+{% endblock %}
+

@@ -66,7 +66,7 @@ class FullCompanySerializer(serializers.ModelSerializer):
 		fields = ('id', 'name', 'logo', 'short_description', 'website',
 		          'description',
 		          'token_detail', 'members', 'documents', 'press_releases',
-		          'facebook', 'telegram', 'slack', 'twitter', 'medium',
+		          'youtube', 'ama', 'facebook', 'telegram', 'slack', 'twitter', 'medium',
 		          'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
 

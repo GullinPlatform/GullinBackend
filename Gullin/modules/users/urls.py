@@ -45,6 +45,10 @@ user_id_verification = UserViewSet.as_view({
 	'post': 'id_verification'
 })
 
+user_log = UserViewSet.as_view({
+	'get': 'log'
+})
+
 urlpatterns = [
 	path('auth/signup/', user_signup, name='user_signup'),
 	path('auth/login/', user_login, name='user_login'),
@@ -59,6 +63,7 @@ urlpatterns = [
 	path('verify/upload_id/', user_id_verification, name='user_id_verification'),
 
 	path('me/', user_me, name='user_me'),
+	path('me/log/', user_log, name='user_log'),
 
 	path('send_kyc_email/<type>/<email>', send_kyc_email)
 ]

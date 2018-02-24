@@ -15,7 +15,7 @@ class CompanyAdmin(admin.ModelAdmin):
 		('Company Info', {'fields': ('name', 'display_img', 'logo', 'short_description', 'website',)}),
 		('Description', {'fields': ('description',)}),
 		('Token Detail', {'fields': ('token_detail',)}),
-		('Social Media', {'fields': ('facebook', 'telegram', 'slack', 'twitter', 'medium',)}),
+		('Social Media', {'fields': ('youtube', 'ama', 'facebook', 'telegram', 'slack', 'twitter', 'medium',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
 	readonly_fields = ('created', 'updated',)

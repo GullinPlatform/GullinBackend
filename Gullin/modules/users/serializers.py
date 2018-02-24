@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from .models import User, InvestorUser, CompanyUser, AnalystUser, InvestorUserAddress, IDVerification, InvestorVerification, VerificationCode
+from .models import (User, InvestorUser, CompanyUser, AnalystUser, InvestorUserAddress,
+                     IDVerification, InvestorVerification, VerificationCode, UserLog)
 
 
 class FullUserSerializer(serializers.ModelSerializer):
@@ -103,11 +104,18 @@ class FullIDVerificationSerializer(serializers.ModelSerializer):
 class FullInvestorVerificationSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = InvestorVerification
-		fields = ('doc_type', 'doc1', 'doc2')
+		fields = ('doc_type', 'doc1', 'doc2',)
 
 
 class FullVerificationCodeSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = VerificationCode
-		fields = ('user', 'code', 'expire_time')
+		fields = ('user', 'code', 'expire_time',)
 		read_only_fields = ('expire_time', 'code',)
+
+
+class FullUserLogVerificationSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = UserLog
+		fields = ('action', 'ip', 'device', 'datetime',)
+		read_only_fields = ('action', 'ip', 'device', 'datetime',)

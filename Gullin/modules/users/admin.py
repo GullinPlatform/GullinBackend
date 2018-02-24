@@ -46,19 +46,19 @@ class UserAdmin(BaseUserAdmin):
 		else:
 			return '-'
 
-	# def edit_company_user(self, obj):
-	# 	if obj.is_company:
-	# 		change_url = reverse('admin:users_companyuser_change', args=(obj.company_user.id,))
-	# 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.company_user))
-	# 	else:
-	# 		return '-'
-	#
-	# def edit_analyst(self, obj):
-	# 	if obj.is_analyst:
-	# 		change_url = reverse('admin:users_user_change', args=(obj.analyst.id,))
-	# 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.analyst.full_name))
-	# 	else:
-	# 		return '-'
+# def edit_company_user(self, obj):
+# 	if obj.is_company:
+# 		change_url = reverse('admin:users_companyuser_change', args=(obj.company_user.id,))
+# 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.company_user))
+# 	else:
+# 		return '-'
+#
+# def edit_analyst(self, obj):
+# 	if obj.is_analyst:
+# 		change_url = reverse('admin:users_user_change', args=(obj.analyst.id,))
+# 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.analyst.full_name))
+# 	else:
+# 		return '-'
 
 
 @admin.register(InvestorUser)
@@ -167,7 +167,7 @@ class IDVerificationAdmin(admin.ModelAdmin):
 
 	# Detail Page Settings
 	fieldsets = (
-		('Base User', {'fields': ('investor_user', 'investor_user_link')}),
+		('Base User', {'fields': ('investor_user_link',)}),
 		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_back', 'user_holding_official_id',)}),
 		('Nationality', {'fields': ('nationality',)}),
 		('Verify', {'fields': ('is_verified', 'note')}),
