@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width"> <!-- Forcing initial-scale shouldn't be necessary -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- Use the latest (edge) version of IE rendering engine -->
     <meta name="x-apple-disable-message-reformatting">  <!-- Disable auto-scale in iOS 10 Mail entirely -->
-    <title>ID Verification Approved</title> <!-- The title tag shows in email notifications, like Android 4.4. -->
+    <title>{{ title }}</title> <!-- The title tag shows in email notifications, like Android 4.4. -->
     <!-- Web Font / @font-face : BEGIN -->
     <!-- NOTE: If web fonts are not required, lines 10 - 27 can be safely removed. -->
 
@@ -227,10 +227,36 @@
             </tr>
             <!-- HEADER : END -->
 
+
+            <!-- INTRO : BEGIN -->
+            <tr>
+                <td bgcolor="#ffffff">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                        <tr>
+                            <td style="padding: 40px 40px 20px 40px; text-align: left;">
+                                <h1 style="margin: 0; font-family: sans-serif; font-size: 20px; line-height: 20px; color: #333333; font-weight: normal;">{{ title }}</h1>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 20px 40px; font-family:  sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
+                                <p style="margin: 0;">
+                                    {{ content }}
+                                </p>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0px 40px 5px 40px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <!-- INTRO : END -->
+
             <!-- HERO : BEGIN -->
             <tr>
                 <!-- Bulletproof Background Images c/o https://backgrounds.cm -->
-                <td background="background.png" bgcolor="#00b19d" align="center" valign="top"
+                <td background="background.png" bgcolor="#2B2E58" align="center" valign="top"
                     style="text-align: center; background-position: center center !important; background-size: cover !important;">
                     <!--[if gte mso 9]>
                         <v:rect xmlns:v="urn:schemas-microsoft-com:vml" fill="true" stroke="false" style="width:680px; height:380px; background-position: center center !important;">
@@ -248,9 +274,8 @@
                                 <td align="center" valign="middle">
                                     <table>
                                         <tr>
-                                            <td valign="top" style="text-align: center; padding: 20px 0 0 0;">
-                                                <h1 style="margin: 0; font-family: 'Montserrat', sans-serif; font-size: 30px; line-height: 36px; color: #ffffff; font-weight: bold;">ID Verification
-                                                    Approved</h1>
+                                            <td style="padding: 20px 40px 10px 40px; font-family: 'Montserrat', sans-serif; font-size: 17px; line-height: 23px; color: #aad4ea; text-align: center; font-weight:normal;">
+                                                <p style="margin: 0;">This email is send to team@gullin.io as a important notification, please pay attention to the content</p>
                                             </td>
                                         </tr>
 
@@ -278,101 +303,13 @@
             </tr>
             <!-- HERO : END -->
 
-            <!-- INTRO : BEGIN -->
-            <tr>
-                <td bgcolor="#ffffff">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                        <tr>
-                            <td style="padding: 40px 40px 20px 40px; text-align: left;">
-                                <h1 style="margin: 0; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #333333; font-weight: normal;">Hi {{ user_full_name }},</h1>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0px 40px 20px 40px; font-family:  sans-serif;  font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
-                                <p style="margin: 0;">Congratulations! Your ID Verification has been approved!
-                                    Now you can start participate in Token Sales on Gullin!</p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0px 40px 5px 40px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
-                                <p style="margin: 0;">Sincerely,</p>
-
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0px 40px 40px 40px; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555; text-align: left; font-weight:normal;">
-                                <p style="margin: 0;">Gullin Team</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <!-- INTRO : END -->
-
-            <!-- CTA : BEGIN -->
-            <tr>
-                <td bgcolor="#2B2E58">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                        <tr>
-                            <td style="padding: 40px 40px 5px 40px; text-align: center;">
-                                <h1 style="margin: 0; font-family: 'Montserrat', sans-serif; font-size: 20px; line-height: 24px; color: #ffffff; font-weight: bold;">IMPORTANT</h1>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 0px 40px 20px 40px; font-family: 'Montserrat', sans-serif; font-size: 17px; line-height: 23px; color: #aad4ea; text-align: center; font-weight:normal;">
-                                <p style="margin: 0;">Gullin will never send or ask you any critical information through email.</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-            <!-- CTA : END -->
-
-            <!-- SOCIAL : BEGIN -->
-            <tr>
-                <td bgcolor="#292828">
-                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
-                        <tr>
-                            <td style="padding: 30px 30px; text-align: center;">
-                                <table align="center" style="text-align: center;">
-                                    <tr>
-                                        <td>
-                                            <a href="https://www.facebook.com/Gullin.io/">
-                                                <img src="https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/facebook_online_social_media-32.png" width="" height=""
-                                                     style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
-                                            </a>
-                                        </td>
-                                        <td width="10">&nbsp;</td>
-                                        <td>
-                                            <a href="https://twitter.com/Gullin_io">
-                                                <img src="https://cdn2.iconfinder.com/data/icons/black-white-social-media/32/online_social_media_twitter-32.png" width="" height=""
-                                                     style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
-                                            </a>
-                                        </td>
-                                        <td width="10">&nbsp;</td>
-                                        <td>
-                                            <a href="https://medium.com/@Gullin.io">
-                                                <img src="https://cdn4.iconfinder.com/data/icons/black-white-social-media/32/medium_social_media_logo-32.png" width="" height=""
-                                                     style="margin:0; padding:0; border:none; display:block;" border="0" alt="">
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </tr>
-
-                    </table>
-                </td>
-            </tr>
-            <!-- SOCIAL : END -->
-
             <!-- FOOTER : BEGIN -->
             <tr>
                 <td bgcolor="#ffffff">
                     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                         <tr>
                             <td style="padding: 40px 40px 10px 40px; font-family: sans-serif; font-size: 12px; line-height: 18px; color: #666666; text-align: center; font-weight:normal;">
-                                <p style="margin: 0;">This email was sent to {{ user_email }} | Unsubscribe</p>
+                                <p style="margin: 0;">This email was sent to team@gullin.io | Unsubscribe</p>
                             </td>
                         </tr>
                         <tr>
@@ -385,7 +322,6 @@
                 </td>
             </tr>
             <!-- FOOTER : END -->
-
         </table>
         <!-- Email Body : END -->
 

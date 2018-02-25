@@ -364,6 +364,7 @@ class UserLog(models.Model):
 
 	class Meta:
 		verbose_name_plural = '7. User Logs'
+		ordering = ['-datetime']
 
 	def __str__(self):
 		return 'UserLog ' + self.datetime.isoformat()
@@ -376,14 +377,14 @@ def add_verification_code_to_user(sender, **kwargs):
 		VerificationCode.objects.create(user=kwargs.get('instance'))
 
 
-# Signal handling function to send email to user when user create new kyc application
-@receiver(post_save, sender=IDVerification)
-def id_verification_processing_email(sender, **kwargs):
-	if kwargs.get('created', True):
-		id_verification = kwargs.get('instance')
-		user = id_verification.investor_user.user
-		ctx = {
-			'user_full_name': user.investor.full_name,
-			'user_email'    : user.email
-		}
-		send_email([user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
+# # Signal handling function to send email to user when user create new kyc application
+# @receiver(post_save, sender=IDVerification)
+# def id_verification_processing_email(sender, **kwargs):
+# 	if kwargs.get('created', True):
+# 		id_verification = kwargs.get('instance')
+# 		user = id_verification.investor_user.user
+# 		ctx = {
+# 			'user_full_name': user.investor.full_name,
+# 			'user_email'    : user.email
+# 		}
+# 		send_email([user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)

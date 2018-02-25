@@ -42,11 +42,15 @@ user_me = UserViewSet.as_view({
 })
 
 user_id_verification = UserViewSet.as_view({
-	'post': 'id_verification'
+	'post': 'id_verification',
+})
+
+user_accredited_investor_verification = UserViewSet.as_view({
+	'post': 'accredited_investor_verification',
 })
 
 user_log = UserViewSet.as_view({
-	'get': 'log'
+	'get': 'log',
 })
 
 urlpatterns = [
@@ -61,6 +65,7 @@ urlpatterns = [
 	path('followup/wallet_address/', user_wallet_address, name='user_wallet_address'),
 
 	path('verify/upload_id/', user_id_verification, name='user_id_verification'),
+	path('verify/aiv/', user_accredited_investor_verification, name='user_accredited_investor_verification'),
 
 	path('me/', user_me, name='user_me'),
 	path('me/log/', user_log, name='user_log'),

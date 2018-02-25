@@ -419,19 +419,6 @@ class UserViewSet(viewsets.ViewSet):
 				serializer = FullInvestorUserSerializer(request.user.investor)
 				return Response(serializer.data, status=status.HTTP_200_OK)
 
-	def id_verification(self, request):
-		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'investor_user'
-		serializer = FullIDVerificationSerializer(data=request.data)
-		if serializer.is_valid():
-			serializer.save()
-
-			investor = request.user.investor
-			investor.verification_level = 3
-			investor.save()
-			return Response(status=status.HTTP_201_CREATED)
-		else:
-			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 	def send_verification_code(self, request):
 		if request.data.get('email'):
 			verification_code = request.user.verification_code
@@ -454,8 +441,49 @@ class UserViewSet(viewsets.ViewSet):
 
 			return Response(status=status.HTTP_200_OK)
 
+	def id_verification(self, request):
+		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'investor_user'
+		serializer = FullIDVerificationSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+
+			investor = request.user.investor
+			investor.verification_level = 3
+			investor.save()
+
+			ctx = {
+				'user_full_name': request.user.investor.full_name,
+				'user_email'    : request.user.email
+			}
+			send_email([request.user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
+
+			return Response(status=status.HTTP_201_CREATED)
+		else:
+			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 	def accredited_investor_verification(self, request):
-		pass
+		if request.user.investor.verification_level == 4 and request.user.investor.nationality == 'United States':
+			# Send team email
+			ctx = {
+				'title'  : 'A user requested accredited investor verification',
+				'content': 'User detail: https://api.gullin.io/juM8A43L9GZ7/users/investoruser/' + str(request.user.investor.id) + '/change/ \n' +
+				           'Link to proceed: https://verifyinvestor.com/issuer/verification/investors'
+			}
+			send_email(['team@gullin.io'], 'A user requested accredited investor verification.', 'gullin_team_notification', ctx)
+
+			# Send user email
+			ctx = {
+				'user_full_name': request.user.investor.full_name,
+				'user_email'    : request.user.email
+			}
+			send_email([request.user.email], 'Gullin - ID Verification Request Received', 'aiv_processing', ctx)
+
+			request.user.investor.verification_level = 5
+			request.user.investor.save()
+
+			return Response(status=status.HTTP_200_OK)
+		else:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def two_factor_auth(self, request):
 		pass
