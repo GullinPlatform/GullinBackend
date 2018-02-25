@@ -12,7 +12,7 @@ from Gullin.utils.rest_framework_jwt.serializers import JSONWebTokenSerializer, 
 from Gullin.utils.rest_framework_jwt.settings import api_settings as jwt_settings
 
 from Gullin.utils.get_client_ip import get_client_ip
-from Gullin.utils.validate_country_code import is_valid_country, get_code_by_country_name
+from Gullin.utils.country_code import country_utils
 from Gullin.utils.send.email import send_email
 from Gullin.utils.send.sms import send_sms
 
@@ -292,14 +292,14 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 		if request.method == 'POST':
 			# request.data must contain country_name, phone
 			country_name = request.data.get('country_name')
-			if is_valid_country(country_name):
+			if country_utils.is_valid_country(country_name):
 				# Cache
 				user = request.user
 				investor_user = request.user.investor
 				verification_code = request.user.verification_code
 
 				# Update phone number of user model
-				user.phone_country_code = get_code_by_country_name(country_name)
+				user.phone_country_code = country_utils.get_phone_prefix_by_country_name(country_name)
 				user.phone = request.data.get('phone')
 				try:
 					user.save()
