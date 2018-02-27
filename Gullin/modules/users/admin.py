@@ -46,6 +46,7 @@ class UserAdmin(BaseUserAdmin):
 		else:
 			return '-'
 
+
 # def edit_company_user(self, obj):
 # 	if obj.is_company:
 # 		change_url = reverse('admin:users_companyuser_change', args=(obj.company_user.id,))
@@ -72,15 +73,22 @@ class InvestorUserAdmin(admin.ModelAdmin):
 	# Detail Page Settings
 	fieldsets = (
 		('Base User', {'fields': ('edit_user',)}),
-		('User Info', {'fields': ('first_name', 'last_name', 'birthday', 'nationality', 'address',)}),
+		('User Info', {'fields': ('first_name', 'last_name', 'birthday', 'nationality', 'address_link',)}),
 		('Verification', {'fields': ('verification_level', 'id_verification_link', 'accredited_investor_verification_link',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
-	readonly_fields = ('created', 'updated', 'edit_user', 'id_verification_link', 'accredited_investor_verification_link',)
+	readonly_fields = ('created', 'updated', 'edit_user', 'address_link', 'id_verification_link', 'accredited_investor_verification_link',)
 
 	def edit_user(self, obj):
 		change_url = reverse('admin:users_user_change', args=(obj.user.id,))
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.user.email))
+
+	def address_link(self, obj):
+		if obj.address:
+			change_url = reverse('admin:users_investoraddress_change', args=(obj.address.id,))
+			return mark_safe('<a href="%s">%s</a>' % (change_url, 'Address'))
+		else:
+			return '-'
 
 	def id_verification_link(self, obj):
 		if obj.id_verification:
