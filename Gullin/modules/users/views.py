@@ -258,6 +258,17 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+	def forgot_password(self, request):
+		if request.method == 'GET':
+			#  Send code
+			pass
+		elif request.method == 'POST':
+			# confirm code
+			pass
+		elif request.method == 'PATCH':
+			# update password
+			pass
+
 
 class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 	"""
@@ -492,6 +503,8 @@ class UserViewSet(viewsets.ViewSet):
 		serializer = FullUserLogVerificationSerializer(request.user.logs, many=True)
 		return Response(serializer.data)
 
+	def change_password(self, request):
+		pass
 
 @api_view(['GET'])
 def send_kyc_email(request, type, email):
