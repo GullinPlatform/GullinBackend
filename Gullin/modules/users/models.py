@@ -138,7 +138,6 @@ class InvestorUser(models.Model):
 	first_name = models.CharField(max_length=30, null=True, blank=True)
 	last_name = models.CharField(max_length=50, null=True, blank=True)
 	nationality = models.CharField(max_length=20, null=True, blank=True)
-	address = models.OneToOneField('InvestorUserAddress', related_name='investor_user', on_delete=models.PROTECT, null=True, blank=True)
 	birthday = models.DateField(null=True, blank=True)
 
 	# Verification
@@ -218,6 +217,9 @@ class InvestorUserAddress(models.Model):
 	"""
 	InvestorUserAddress model is used for store InvestorUser address.
 	"""
+	# Investor user
+	investor_user = models.OneToOneField('InvestorUser', related_name='address', on_delete=models.CASCADE, null=True, blank=True)
+
 	# Address Info
 	address1 = models.CharField(max_length=400)
 	address2 = models.CharField(max_length=200, null=True, blank=True)
@@ -234,7 +236,7 @@ class InvestorUserAddress(models.Model):
 		verbose_name_plural = '3. Investor User Address'
 
 	def __str__(self):
-		return self.investor_user.full_name + ' Address'
+		return 'Investor Address'
 
 
 class IDVerification(models.Model):
@@ -375,7 +377,6 @@ class UserLog(models.Model):
 def add_verification_code_to_user(sender, **kwargs):
 	if kwargs.get('created', True):
 		VerificationCode.objects.create(user=kwargs.get('instance'))
-
 
 # # Signal handling function to send email to user when user create new kyc application
 # @receiver(post_save, sender=IDVerification)
