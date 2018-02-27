@@ -3,6 +3,33 @@ from django.contrib import admin
 from .models import Company, CompanyMember, PressRelease, TokenDetail, Document
 
 
+class CompanyMemberInline(admin.TabularInline):
+	model = CompanyMember
+	show_change_link = True
+	fields = ('avatar', 'first_name', 'last_name',
+	          'title', 'description', 'member_type',
+	          'facebook', 'linkedin', 'website',
+	          'created', 'updated',)
+	readonly_fields = ('created', 'updated',)
+	extra = 0
+
+
+class DocumentInline(admin.TabularInline):
+	model = Document
+	show_change_link = True
+	fields = ('title', 'url',)
+	readonly_fields = ('created',)
+	extra = 0
+
+
+class PressReleaseInline(admin.TabularInline):
+	model = PressRelease
+	show_change_link = True
+	fields = ('title', 'brief', 'url',
+	          'created',)
+	extra = 0
+
+
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
 	# List display Settings
@@ -19,6 +46,8 @@ class CompanyAdmin(admin.ModelAdmin):
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
 	readonly_fields = ('created', 'updated',)
+
+	inlines = [CompanyMemberInline, DocumentInline, PressReleaseInline, ]
 
 
 @admin.register(CompanyMember)
@@ -69,7 +98,7 @@ class TokenDetailAdmin(admin.ModelAdmin):
 		('ICO Type', {'fields': ('ico_token_type', 'ico_stage_type',)}),
 		('ICO Time', {'fields': ('start_datetime', 'end_datetime', 'is_finished')}),
 		('Tokenomics', {'fields': ('price', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution')}),
-		('Investment', {'fields': ('threshold', 'restrictions', 'restricted_country_list', 'bonus',)}),
+		('Investment', {'fields': ('threshold', 'bonus', 'restrictions', 'restricted_country_list', 'accredited_investors', 'accredited_investors_country_list')}),
 		('Smart Contract Info', {'fields': ('crowd_sale_contract_address', 'token_address', 'decimals',)}),
 		('ICO Stage', {'fields': ('is_finished',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),

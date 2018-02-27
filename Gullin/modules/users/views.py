@@ -12,7 +12,7 @@ from Gullin.utils.rest_framework_jwt.serializers import JSONWebTokenSerializer, 
 from Gullin.utils.rest_framework_jwt.settings import api_settings as jwt_settings
 
 from Gullin.utils.get_client_ip import get_client_ip
-from Gullin.utils.validate_country_code import is_valid_country, get_code_by_country_name
+from Gullin.utils.country_code import country_utils
 from Gullin.utils.send.email import send_email
 from Gullin.utils.send.sms import send_sms
 
@@ -258,6 +258,17 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+	def forgot_password(self, request):
+		if request.method == 'GET':
+			#  Send code
+			pass
+		elif request.method == 'POST':
+			# confirm code
+			pass
+		elif request.method == 'PATCH':
+			# update password
+			pass
+
 
 class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 	"""
@@ -292,14 +303,14 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 		if request.method == 'POST':
 			# request.data must contain country_name, phone
 			country_name = request.data.get('country_name')
-			if is_valid_country(country_name):
+			if country_utils.is_valid_country(country_name):
 				# Cache
 				user = request.user
 				investor_user = request.user.investor
 				verification_code = request.user.verification_code
 
 				# Update phone number of user model
-				user.phone_country_code = get_code_by_country_name(country_name)
+				user.phone_country_code = country_utils.get_phone_prefix_by_country_name(country_name)
 				user.phone = request.data.get('phone')
 				try:
 					user.save()
@@ -419,19 +430,6 @@ class UserViewSet(viewsets.ViewSet):
 				serializer = FullInvestorUserSerializer(request.user.investor)
 				return Response(serializer.data, status=status.HTTP_200_OK)
 
-	def id_verification(self, request):
-		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'investor_user'
-		serializer = FullIDVerificationSerializer(data=request.data)
-		if serializer.is_valid():
-			serializer.save()
-
-			investor = request.user.investor
-			investor.verification_level = 3
-			investor.save()
-			return Response(status=status.HTTP_201_CREATED)
-		else:
-			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 	def send_verification_code(self, request):
 		if request.data.get('email'):
 			verification_code = request.user.verification_code
@@ -454,8 +452,49 @@ class UserViewSet(viewsets.ViewSet):
 
 			return Response(status=status.HTTP_200_OK)
 
+	def id_verification(self, request):
+		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'investor_user'
+		serializer = FullIDVerificationSerializer(data=request.data)
+		if serializer.is_valid():
+			serializer.save()
+
+			investor = request.user.investor
+			investor.verification_level = 3
+			investor.save()
+
+			ctx = {
+				'user_full_name': request.user.investor.full_name,
+				'user_email'    : request.user.email
+			}
+			send_email([request.user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
+
+			return Response(status=status.HTTP_201_CREATED)
+		else:
+			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 	def accredited_investor_verification(self, request):
-		pass
+		if request.user.investor.verification_level == 4 and request.user.investor.nationality == 'United States':
+			# Send team email
+			ctx = {
+				'title'  : 'A user requested accredited investor verification',
+				'content': 'User detail: https://api.gullin.io/juM8A43L9GZ7/users/investoruser/' + str(request.user.investor.id) + '/change/ \n' +
+				           'Link to proceed: https://verifyinvestor.com/issuer/verification/investors'
+			}
+			send_email(['team@gullin.io'], 'A user requested accredited investor verification.', 'gullin_team_notification', ctx)
+
+			# Send user email
+			ctx = {
+				'user_full_name': request.user.investor.full_name,
+				'user_email'    : request.user.email
+			}
+			send_email([request.user.email], 'Gullin - ID Verification Request Received', 'aiv_processing', ctx)
+
+			request.user.investor.verification_level = 5
+			request.user.investor.save()
+
+			return Response(status=status.HTTP_200_OK)
+		else:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def two_factor_auth(self, request):
 		pass
@@ -464,6 +503,8 @@ class UserViewSet(viewsets.ViewSet):
 		serializer = FullUserLogVerificationSerializer(request.user.logs, many=True)
 		return Response(serializer.data)
 
+	def change_password(self, request):
+		pass
 
 @api_view(['GET'])
 def send_kyc_email(request, type, email):

@@ -87,9 +87,11 @@ class TokenDetail(models.Model):
 
 	# Investment Info
 	threshold = models.FloatField(null=True, blank=True)
-	restrictions = models.TextField(null=True, blank=True)
 	bonus = models.TextField(null=True, blank=True)
+	restrictions = models.TextField(null=True, blank=True)
 	restricted_country_list = models.TextField(default='[]')
+	accredited_investors = models.TextField(null=True, blank=True)
+	accredited_investors_country_list = models.TextField(default='[]')
 
 	# Smart Contract Info
 	crowd_sale_contract_address = models.CharField(max_length=200, null=True, blank=True)
@@ -125,13 +127,14 @@ class PressRelease(models.Model):
 	url = models.URLField(null=True, blank=True)
 
 	# Timestamp
-	created = models.DateTimeField(auto_now_add=True)
+	created = models.DateField()
 
 	def __str__(self):
 		return self.company.name + ' ' + self.title
 
 	class Meta:
-		verbose_name_plural = '4. Company Press Peleases'
+		verbose_name_plural = '4. Company Press Releases'
+		ordering = ['-created']
 
 
 class CompanyMember(models.Model):

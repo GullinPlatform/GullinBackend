@@ -19,7 +19,7 @@ class FullTokenDetailSerializer(serializers.ModelSerializer):
 class MiniTokenDetailSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TokenDetail
-		fields = ('is_finished', 'start_datetime', 'end_datetime',)
+		fields = ('is_finished', 'ico_stage_type', 'ico_token_type', 'start_datetime', 'end_datetime',)
 
 
 class BalanceTokenDetailSerializer(serializers.ModelSerializer):
