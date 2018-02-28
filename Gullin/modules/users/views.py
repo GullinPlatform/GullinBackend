@@ -204,7 +204,8 @@ class UserAuthViewSet(viewsets.ViewSet):
 				# Code is valid
 
 				# Clear session
-				request.session.clear()
+				del request.session['auth_token']
+				del request.session['user_id']
 				user_ip = get_client_ip(request)
 
 				# Update user last login timestamp and last login IP
