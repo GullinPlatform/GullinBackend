@@ -463,8 +463,8 @@ class UserViewSet(viewsets.ViewSet):
 			# Update Address
 			if request.data.get('update') == 'address':
 				# Check content
-				if request.user.investor.address:
-					address = request.user.investor.address
+				if request.user.investor.address.first():
+					address = request.user.investor.address.first()
 					address.address1 = request.data['address1']
 					address.address2 = request.data['address2']
 					address.city = request.data['city']
@@ -473,14 +473,13 @@ class UserViewSet(viewsets.ViewSet):
 					address.country = request.user.investor.nationality
 					address.save()
 				else:
-					address = InvestorUserAddress.objects.create(address1=request.data['address1'],
-					                                             address2=request.data['address2'],
-					                                             city=request.data['city'],
-					                                             state=request.data['state'],
-					                                             zipcode=request.data['zipcode'],
-					                                             country=request.user.investor.nationality)
-					request.user.investor.address = address
-					request.user.investor.save()
+					InvestorUserAddress.objects.create(investor_user_id=request.user.investor.id,
+					                                   address1=request.data['address1'],
+					                                   address2=request.data['address2'],
+					                                   city=request.data['city'],
+					                                   state=request.data['state'],
+					                                   zipcode=request.data['zipcode'],
+					                                   country=request.user.investor.nationality)
 				serializer = FullInvestorUserSerializer(request.user.investor)
 				return Response(serializer.data, status=status.HTTP_200_OK)
 

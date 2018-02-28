@@ -62,7 +62,7 @@ class FullInvestorUserSerializer(serializers.ModelSerializer):
 	Full Serializer for InvestorUser
 	"""
 	user = BasicUserSerializer()
-	address = BaseUserAddressSerializer()
+	address = BaseUserAddressSerializer(many=True)
 
 	class Meta:
 		model = InvestorUser

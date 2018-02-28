@@ -218,7 +218,7 @@ class InvestorUserAddress(models.Model):
 	InvestorUserAddress model is used for store InvestorUser address.
 	"""
 	# Investor user
-	investor_user = models.OneToOneField('InvestorUser', related_name='address', on_delete=models.CASCADE, null=True, blank=True)
+	investor_user = models.ForeignKey('InvestorUser', related_name='address', on_delete=models.CASCADE)
 
 	# Address Info
 	address1 = models.CharField(max_length=400)
