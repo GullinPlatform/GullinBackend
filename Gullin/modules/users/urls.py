@@ -19,10 +19,10 @@ user_refresh = UserAuthViewSet.as_view({
 	'post': 'refresh'
 })
 
-user_forgot_password = UserAuthViewSet.as_view({
-	'get'  : 'forgot_password',
-	'post' : 'forgot_password',
-	'patch': 'forgot_password'
+user_forget_password = UserAuthViewSet.as_view({
+	'get'  : 'forget_password',
+	'post' : 'forget_password',
+	'patch': 'forget_password'
 })
 
 user_wallet_address = UserSignUpFollowUpViewSet.as_view({
@@ -68,7 +68,7 @@ urlpatterns = [
 	path('auth/login/', user_login, name='user_login'),
 	path('auth/refresh/', user_refresh, name='user_refresh'),
 	path('auth/logout/', user_logout, name='user_logout'),
-	path('auth/forgot_password/', user_forgot_password, name='user_forgot_password'),
+	path('auth/forget_password/', user_forget_password, name='user_forget_password'),
 
 	path('followup/email/', user_verify_email, name='user_verify_email'),
 	path('followup/phone/', user_verify_phone, name='user_verify_phone'),
