@@ -204,7 +204,8 @@ class UserAuthViewSet(viewsets.ViewSet):
 				# Code is valid
 
 				# Clear session
-				request.session.clear()
+				del request.session['auth_token']
+				del request.session['user_id']
 				user_ip = get_client_ip(request)
 
 				# Update user last login timestamp and last login IP
@@ -258,16 +259,89 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-	def forgot_password(self, request):
+	def forget_password(self, request):
 		if request.method == 'GET':
-			#  Send code
-			pass
+			# Send code
+			email_or_phone = request.query_params.get('u')
+			if not email_or_phone:
+				return Response({'error': 'Must provide email or phone.'}, status=status.HTTP_400_BAD_REQUEST)
+
+			user = User.objects.filter(email=email_or_phone)
+			# email
+			if user:
+				user = user[0]
+				user.verification_code.refresh()
+				request.session['user_id'] = user.id
+				# Send email
+				verification_code = user.verification_code
+				verification_code.refresh()
+				ctx = {
+					'user_full_name'   : user.investor.full_name,
+					'verification_code': verification_code.code,
+					'user_email'       : user.email
+				}
+				send_email([user.email], 'Gullin - Verification Code', 'verification_code', ctx)
+
+				UserLog.objects.create(user_id=user.id,
+				                       ip=get_client_ip(request),
+				                       action='Forgot password request',
+				                       device=request.META['HTTP_USER_AGENT'])
+
+				msg = {'data': 'We have sent a verification code to your email, please verify.'}
+				return Response(msg, status=status.HTTP_200_OK)
+			# phone
+			user = User.objects.filter(phone=email_or_phone)
+			if user:
+				user = user[0]
+				user.verification_code.refresh()
+				request.session['user_id'] = user.id
+				# Send sms
+				phone_num = user.phone_country_code + user.phone
+				send_sms(phone_num,
+				         'Verification Code: ' + user.verification_code.code + '\nInvalid in 5 minutes.')
+				UserLog.objects.create(user_id=user.id,
+				                       ip=get_client_ip(request),
+				                       action='Forgot password request',
+				                       device=request.META['HTTP_USER_AGENT'])
+
+				msg = {'data': 'We have sent a verification code to your phone, please verify.'}
+				return Response(msg, status=status.HTTP_200_OK)
+
+			else:
+				return Response({'error': 'Unable to locate your account'}, status=status.HTTP_404_NOT_FOUND)
 		elif request.method == 'POST':
-			# confirm code
-			pass
+			if not request.session.get('user_id'):
+				return Response(status.HTTP_400_BAD_REQUEST)
+			user = User.objects.get(id=request.session['user_id'])
+			verification_code = user.verification_code
+			# Check If code is valid
+			if verification_code.is_expired:
+				return Response({'error': 'Verification code expired, please request another code.'},
+				                status=status.HTTP_400_BAD_REQUEST)
+			if not (request.data.get('verification_code') == verification_code.code):
+				return Response({'error': 'Verification code doesn\'t match, please try again or request another code.'},
+				                status=status.HTTP_400_BAD_REQUEST)
+			# Verification code is valid, so expire verification code
+			verification_code.expire()
+			request.session['change_password'] = True
+			return Response(status=status.HTTP_200_OK)
 		elif request.method == 'PATCH':
 			# update password
-			pass
+			if not (request.session.get('change_password', False) and request.session.get('user_id', False)):
+				return Response(status=status.HTTP_400_BAD_REQUEST)
+
+			user = User.objects.get(id=request.session['user_id'])
+
+			user.set_password(request.data['password'])
+			user.save()
+			# clear session
+			del request.session['change_password']
+			del request.session['user_id']
+			UserLog.objects.create(user_id=user.id,
+			                       ip=get_client_ip(request),
+			                       action='Password changed',
+			                       device=request.META['HTTP_USER_AGENT'])
+			return Response(status=status.HTTP_200_OK)
 
 
 class UserSignUpFollowUpViewSet(viewsets.ViewSet):
@@ -389,8 +463,8 @@ class UserViewSet(viewsets.ViewSet):
 			# Update Address
 			if request.data.get('update') == 'address':
 				# Check content
-				if request.user.investor.address:
-					address = request.user.investor.address
+				if request.user.investor.address.first():
+					address = request.user.investor.address.first()
 					address.address1 = request.data['address1']
 					address.address2 = request.data['address2']
 					address.city = request.data['city']
@@ -399,14 +473,13 @@ class UserViewSet(viewsets.ViewSet):
 					address.country = request.user.investor.nationality
 					address.save()
 				else:
-					address = InvestorUserAddress.objects.create(address1=request.data['address1'],
-					                                             address2=request.data['address2'],
-					                                             city=request.data['city'],
-					                                             state=request.data['state'],
-					                                             zipcode=request.data['zipcode'],
-					                                             country=request.user.investor.nationality)
-					request.user.investor.address = address
-					request.user.investor.save()
+					InvestorUserAddress.objects.create(investor_user_id=request.user.investor.id,
+					                                   address1=request.data['address1'],
+					                                   address2=request.data['address2'],
+					                                   city=request.data['city'],
+					                                   state=request.data['state'],
+					                                   zipcode=request.data['zipcode'],
+					                                   country=request.user.investor.nationality)
 				serializer = FullInvestorUserSerializer(request.user.investor)
 				return Response(serializer.data, status=status.HTTP_200_OK)
 
