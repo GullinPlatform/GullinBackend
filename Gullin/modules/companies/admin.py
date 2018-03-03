@@ -39,6 +39,7 @@ class CompanyAdmin(admin.ModelAdmin):
 
 	# Detail Page Settings
 	fieldsets = (
+		('Published', {'fields': ('published',)}),
 		('Company Info', {'fields': ('name', 'display_img', 'logo', 'short_description', 'website',)}),
 		('Description', {'fields': ('description',)}),
 		('Token Detail', {'fields': ('token_detail',)}),

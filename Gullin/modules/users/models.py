@@ -244,9 +244,9 @@ class IDVerification(models.Model):
 	ID Verification model is used for verify InvestorUser identity.
 	"""
 
-	ID_TYPE_CHOICES = (('driver_license', 'Driver License'),
-	                   ('photo_id', 'Photo ID'),
-	                   ('passport', 'Passport'))
+	ID_TYPE_CHOICES = (('DL', 'Driver License'),
+	                   ('ID', 'Photo ID'),
+	                   ('PP', 'Passport'))
 
 	investor_user = models.OneToOneField('InvestorUser', related_name='id_verification', on_delete=models.CASCADE, null=True, blank=True)
 

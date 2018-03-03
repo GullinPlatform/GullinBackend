@@ -8,6 +8,9 @@ class Company(models.Model):
 	Company Model
 	Contains company basic info, social media info, etc.
 	"""
+	# Published
+	published = models.BooleanField(default=False)
+
 	# Company Info
 	name = models.CharField(max_length=50, unique=True)
 	logo = models.ImageField(upload_to=company_icon_dir, null=True)

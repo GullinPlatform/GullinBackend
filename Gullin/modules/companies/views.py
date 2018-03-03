@@ -17,16 +17,23 @@ class CompanyViewSet(viewsets.ViewSet):
 	permission_classes = (AllowAny,)
 
 	def list(self, request, list_type):
+		companies = Company.objects.filter(published=True)
 		if list_type == 'active':
 			serializer = ListCompanySerializer(
-				Company.objects.filter(token_detail__end_datetime__gt=timezone.now(), token_detail__start_datetime__lt=timezone.now()).order_by('token_detail__end_datetime'),
+				companies.filter(token_detail__end_datetime__gt=timezone.now(), token_detail__start_datetime__lt=timezone.now()).order_by('token_detail__end_datetime'),
 				many=True)
 		elif list_type == 'coming':
-			serializer = ListCompanySerializer(Company.objects.filter(token_detail__start_datetime__gt=timezone.now()).order_by('token_detail__end_datetime'), many=True)
+			serializer = ListCompanySerializer(
+				companies.filter(token_detail__start_datetime__gt=timezone.now()).order_by('token_detail__end_datetime'),
+				many=True)
 		elif list_type == 'all':
-			serializer = ListCompanySerializer(Company.objects.all().order_by('token_detail__end_datetime'), many=True)
+			serializer = ListCompanySerializer(
+				companies.order_by('token_detail__end_datetime'),
+				many=True)
 		else:
-			serializer = ListCompanySerializer(Company.objects.all().order_by('token_detail__end_datetime'), many=True)
+			serializer = ListCompanySerializer(
+				companies.order_by('token_detail__end_datetime'),
+				many=True)
 		return Response(serializer.data)
 
 	def detail(self, request, id):
