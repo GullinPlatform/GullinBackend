@@ -579,6 +579,7 @@ class UserViewSet(viewsets.ViewSet):
 	def change_password(self, request):
 		pass
 
+
 @api_view(['GET'])
 def send_kyc_email(request, type, email):
 	if type == 'success':
