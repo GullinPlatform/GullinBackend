@@ -16,7 +16,7 @@ class Balance(models.Model):
 	wallet = models.ForeignKey('Wallet', related_name='balances', on_delete=models.CASCADE)
 
 	# Balance Info
-	token = models.ForeignKey('companies.TokenDetail', related_name='balances', on_delete=models.PROTECT)
+	token = models.ForeignKey('companies.TokenDetail', related_name='balances', on_delete=models.CASCADE)
 	balance = models.FloatField(default=0.0)
 
 	# TimeStamp
