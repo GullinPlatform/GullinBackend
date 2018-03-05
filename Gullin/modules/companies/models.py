@@ -80,7 +80,7 @@ class TokenDetail(models.Model):
 
 	# Tokenomics
 	price = models.FloatField(null=True, blank=True)
-	total_token_supply = models.IntegerField(null=True, blank=True)
+	total_token_supply = models.BigIntegerField(null=True, blank=True)
 
 	soft_market_cap = models.FloatField(null=True, blank=True)
 	hard_market_cap = models.FloatField(null=True, blank=True)
