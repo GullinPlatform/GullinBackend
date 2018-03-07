@@ -32,7 +32,7 @@ class CompanyViewSet(viewsets.ViewSet):
 				many=True)
 		else:
 			serializer = ListCompanySerializer(
-				companies.order_by('token_detail__end_datetime'),
+				companies.filter(token_detail__end_datetime__gt=timezone.now()).order_by('token_detail__end_datetime'),
 				many=True)
 		return Response(serializer.data)
 

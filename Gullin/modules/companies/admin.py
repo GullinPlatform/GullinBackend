@@ -110,7 +110,7 @@ class TokenDetailAdmin(admin.ModelAdmin):
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
 	# List display Settings
-	list_display = ('id', 'title', 'created',)
+	list_display = ('id', 'company', 'title', 'created',)
 	search_fields = ('title',)
 	ordering = ('created',)
 
