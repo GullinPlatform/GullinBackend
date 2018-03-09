@@ -178,7 +178,7 @@ class IDVerificationAdmin(admin.ModelAdmin):
 		('Base User', {'fields': ('investor_user_link',)}),
 		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_back', 'user_holding_official_id',)}),
 		('Nationality', {'fields': ('nationality',)}),
-		('Verify', {'fields': ('is_verified', 'note')}),
+		('Verify', {'fields': ('tid', 'note')}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
 	readonly_fields = ('created', 'updated', 'investor_user_link')

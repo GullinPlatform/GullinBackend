@@ -255,11 +255,10 @@ class IDVerification(models.Model):
 	official_id_front = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 	official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 	user_holding_official_id = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
-
 	nationality = models.CharField(max_length=20, null=True, blank=True)
 
-	# Identifier
-	is_verified = models.BooleanField(default=False)
+	# Transaction ID
+	tid = models.CharField(max_length=40, null=True, blank=True)
 
 	# Note
 	note = models.TextField(null=True, blank=True)
