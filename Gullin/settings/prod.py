@@ -18,7 +18,7 @@ SECRET_KEY = open(os.path.join(BASE_DIR, 'settings/securities/django_secret_key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['api.gullin.io',]
 
 # Application definition
 INSTALLED_APPS = [
@@ -76,11 +76,11 @@ WSGI_APPLICATION = 'Gullin.wsgi.application'
 DATABASES = {
 	'default': {
 		'ENGINE'  : 'django.db.backends.mysql',
-		'NAME'    : '',
-		'USER'    : '',
-		'PASSWORD': '',
-		'HOST'    : '',
-		'PORT'    : ''
+		'NAME'    : 'gullin',
+		'USER'    : 'gullin',
+		'PASSWORD': '2E4PiUo7CZr7e7oHwoE}iDXonVkPrZUA',
+		'HOST'    : 'gullindatabase.czhgqq7lvioo.us-east-1.rds.amazonaws.com',
+		'PORT'    : '3306'
 	}
 }
 
@@ -149,6 +149,8 @@ GEOIP_PATH = os.path.join(BASE_DIR, 'utils/geoip')
 CORS_ORIGIN_WHITELIST = (
 	'http://app.gullin.io',
 	'https://app.gullin.io',
+	'app.gullin.io',
+	'gullin.io',
 )
 
 CORS_ALLOW_HEADERS = (
