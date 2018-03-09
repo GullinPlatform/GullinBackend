@@ -470,7 +470,7 @@ class UserViewSet(viewsets.ViewSet):
 					address.city = request.data['city']
 					address.state = request.data['state']
 					address.zipcode = request.data['zipcode']
-					address.country = request.user.investor.nationality
+					address.country = request.data['country']
 					address.save()
 				else:
 					InvestorUserAddress.objects.create(investor_user_id=request.user.investor.id,
@@ -479,7 +479,7 @@ class UserViewSet(viewsets.ViewSet):
 					                                   city=request.data['city'],
 					                                   state=request.data['state'],
 					                                   zipcode=request.data['zipcode'],
-					                                   country=request.user.investor.nationality)
+					                                   country=request.data['country'], )
 				serializer = FullInvestorUserSerializer(request.user.investor)
 				return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -487,9 +487,8 @@ class UserViewSet(viewsets.ViewSet):
 			elif request.data.get('update') == 'name_birthday':
 				investor_user = request.user.investor
 
-				# If user ID approved
-				if investor_user.verification_level >= 3:
-					# User cannot change birthday and name
+				# User cannot change birthday, name and nationality if user is being processed or verified
+				if investor_user.verification_level > 2:
 					return Response(status.HTTP_403_FORBIDDEN)
 
 				if request.data.get('birthday'):
@@ -498,6 +497,8 @@ class UserViewSet(viewsets.ViewSet):
 					request.user.first_name = request.data.get('first_name')
 				if request.data.get('last_name'):
 					request.user.last_name = request.data.get('last_name')
+				if request.data.get('nationality'):
+					investor_user.nationality = request.data.get('nationality')
 				investor_user.save()
 
 				serializer = FullInvestorUserSerializer(request.user.investor)
