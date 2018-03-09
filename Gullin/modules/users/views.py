@@ -1,6 +1,11 @@
+import json
+import base64
+import requests
+
 from django.utils import timezone
 from django.db.utils import IntegrityError
 from django.contrib.gis.geoip2 import GeoIP2
+from django.core.files.base import ContentFile
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -470,7 +475,7 @@ class UserViewSet(viewsets.ViewSet):
 					address.city = request.data['city']
 					address.state = request.data['state']
 					address.zipcode = request.data['zipcode']
-					address.country = request.user.investor.nationality
+					address.country = request.data['country']
 					address.save()
 				else:
 					InvestorUserAddress.objects.create(investor_user_id=request.user.investor.id,
@@ -479,7 +484,7 @@ class UserViewSet(viewsets.ViewSet):
 					                                   city=request.data['city'],
 					                                   state=request.data['state'],
 					                                   zipcode=request.data['zipcode'],
-					                                   country=request.user.investor.nationality)
+					                                   country=request.data['country'], )
 				serializer = FullInvestorUserSerializer(request.user.investor)
 				return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -487,9 +492,8 @@ class UserViewSet(viewsets.ViewSet):
 			elif request.data.get('update') == 'name_birthday':
 				investor_user = request.user.investor
 
-				# If user ID approved
-				if investor_user.verification_level >= 3:
-					# User cannot change birthday and name
+				# User cannot change birthday, name and nationality if user is being processed or verified
+				if investor_user.verification_level > 2:
 					return Response(status.HTTP_403_FORBIDDEN)
 
 				if request.data.get('birthday'):
@@ -498,6 +502,8 @@ class UserViewSet(viewsets.ViewSet):
 					request.user.first_name = request.data.get('first_name')
 				if request.data.get('last_name'):
 					request.user.last_name = request.data.get('last_name')
+				if request.data.get('nationality'):
+					investor_user.nationality = request.data.get('nationality')
 				investor_user.save()
 
 				serializer = FullInvestorUserSerializer(request.user.investor)
@@ -526,21 +532,81 @@ class UserViewSet(viewsets.ViewSet):
 			return Response(status=status.HTTP_200_OK)
 
 	def id_verification(self, request):
-		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'nationality', 'investor_user'
-		serializer = FullIDVerificationSerializer(data=request.data)
-		if serializer.is_valid():
-			serializer.save()
+		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'user_holding_official_id', 'investor_user'
 
+		# copy the form data
+		form_data = request.data.copy()
+
+		# recreate id_front_file file by decoding base64
+		if request.data['official_id_front']:
+			format, imgstr = form_data['official_id_front'].split(';base64,')
+			ext = format.split('/')[-1]
+			id_front_file = ContentFile(base64.b64decode(imgstr), name='front.' + ext)
+			form_data['official_id_front'] = id_front_file
+
+		# recreate id_back_file file by decoding base64
+		if request.data['official_id_back']:
+			format, imgstr = form_data['official_id_back'].split(';base64,')
+			ext = format.split('/')[-1]
+			id_back_file = ContentFile(base64.b64decode(imgstr), name='back.' + ext)
+			form_data['official_id_back'] = id_back_file
+
+		# recreate id_holding_file file by decoding base64
+		if request.data['user_holding_official_id']:
+			format, imgstr = form_data['user_holding_official_id'].split(';base64,')
+			ext = format.split('/')[-1]
+			id_holding_file = ContentFile(base64.b64decode(imgstr), name='hold.' + ext)
+			form_data['user_holding_official_id'] = id_holding_file
+
+		serializer = FullIDVerificationSerializer(data=form_data)
+		if serializer.is_valid(raise_exception=True):
+			id_verification_instance = serializer.save()
 			investor = request.user.investor
-			investor.verification_level = 3
-			investor.save()
+			investor_address = investor.address.first()
+
+			form_data = {
+				'man'              : request.user.email,
+				'tea'              : request.user.email,
+
+				'bfn'              : investor.first_name,
+				'bln'              : investor.last_name,
+				'dob'              : investor.birthday.isoformat(),
+
+				'bsn'              : investor_address.address1 + ', ' + investor_address.address2,
+				'bc'               : investor_address.city,
+				'bs'               : investor_address.state,
+				'bz'               : investor_address.zipcode,
+				'bco'              : country_utils.get_ISO3166_code_by_country_name(investor_address.country),
+
+				'docType'          : request.data['official_id_type'],
+				'docCountry'       : country_utils.get_ISO3166_code_by_country_name(investor.nationality),
+				'scanData'         : request.data['official_id_front'],
+				'backsideImageData': request.data['official_id_back'] if request.data['official_id_back'] else '',
+				'faceImages'       : [
+					request.data['user_holding_official_id'],
+				],
+
+				'ip'               : request.user.last_login_ip,
+				'phn'              : request.user.phone_country_code + request.user.phone
+			}
+
+			stage_api = 'https://staging.identitymind.com/im/account/consumer'
+			r = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
+			print(r.text)
+			json_data = json.loads(r.text)
+
+			id_verification_instance.tid = json_data['tid']
+			id_verification_instance.note = r.text
+			id_verification_instance.save()
 
 			ctx = {
-				'user_full_name': request.user.investor.full_name,
+				'user_full_name': investor.full_name,
 				'user_email'    : request.user.email
 			}
 			send_email([request.user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
 
+			investor.verification_level = 3
+			investor.save()
 			return Response(status=status.HTTP_201_CREATED)
 		else:
 			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

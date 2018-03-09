@@ -200,3 +200,6 @@ EMAIL_SEND_FROM = 'Gullin <no-reply@gullin.io>'
 
 # AWS SNS Message Service
 AWS_SNS_REGION_NAME = 'us-east-1'
+
+# Set Max Data Upload Size to 5MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
