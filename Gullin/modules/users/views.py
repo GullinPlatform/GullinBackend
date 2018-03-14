@@ -587,23 +587,50 @@ class UserViewSet(viewsets.ViewSet):
 				],
 
 				'ip'               : request.user.last_login_ip,
-				'phn'              : request.user.phone_country_code + request.user.phone
+				'phn'              : request.user.phone_country_code + request.user.phone,
+
+				'stage'            : 1,
 			}
 
 			stage_api = 'https://staging.identitymind.com/im/account/consumer'
-			r = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
-			print(r.text)
-			json_data = json.loads(r.text)
+			res = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
+			# print(res.text)
 
-			id_verification_instance.tid = json_data['tid']
-			id_verification_instance.note = r.text
-			id_verification_instance.save()
+			res = json.loads(res.text)
+			id_verification_instance.tid = res['tid']
+			id_verification_instance.note = res
+			id_verification_instance.stage = 1
+			id_verification_instance.state = res['state']
 
 			ctx = {
 				'user_full_name': investor.full_name,
 				'user_email'    : request.user.email
 			}
 			send_email([request.user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
+
+			if res['state'] == 'A':
+				form_data['tid'] = res['tid']
+
+				if form_data['docCountry'] == 'US':
+					form_data['stage'] = 2
+				elif form_data['docCountry'] in ['AU', 'CA', 'DK', 'NL', 'ZA', 'SE', 'UK']:
+					form_data['stage'] = 3
+				else:
+					form_data['stage'] = 4
+
+				res = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
+				# print(res.text)
+				res = json.loads(res.text)
+
+				id_verification_instance.tid = res['tid']
+				id_verification_instance.note = res
+				id_verification_instance.stage = form_data['stage']
+				id_verification_instance.state = res['state']
+			else:
+				# TODO: send user email and inform that the kyc failed
+				pass
+
+			id_verification_instance.save()
 
 			investor.verification_level = 3
 			investor.save()
