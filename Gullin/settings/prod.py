@@ -134,7 +134,7 @@ JWT_AUTH = {
 	'JWT_ALGORITHM'               : 'RS256',
 
 	'JWT_VERIFY_EXPIRATION'       : True,
-	'JWT_EXPIRATION_DELTA'        : datetime.timedelta(seconds=300),
+	'JWT_EXPIRATION_DELTA'        : datetime.timedelta(hours=1),
 	'JWT_ALLOW_REFRESH'           : True,
 	'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=1),
 
@@ -186,7 +186,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # AWS SES Email Service
 AWS_SES_REGION_NAME = 'us-east-1'
 EMAIL_BACKEND = 'Gullin.utils.send.email.SESBackend'
-EMAIL_SEND_FROM = 'Gullin <no-reply@gullin.io>'
+EMAIL_SEND_FROM = 'Gullin <noreply@gullin.io>'
 # Async Email Sending Backend
 # TODO
 # EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
