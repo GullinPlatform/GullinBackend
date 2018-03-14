@@ -259,6 +259,8 @@ class IDVerification(models.Model):
 
 	# Transaction ID
 	tid = models.CharField(max_length=40, null=True, blank=True)
+	stage = models.IntegerField(default=0)
+	state = models.CharField(max_length=20, default='R')
 
 	# Note
 	note = models.TextField(null=True, blank=True)
@@ -272,35 +274,6 @@ class IDVerification(models.Model):
 
 	def __str__(self):
 		return self.official_id_type
-
-
-# def verify_identity(self):
-# 	# cache
-# 	investor = self.investor_user
-# 	# update verification status
-# 	self.is_verified = True
-# 	# sync nationality (this is for users who use different country phone number when register,
-# 	# when we manually check user identity, we have to update user nationality on the admin portal and sync with investor user model)
-# 	# TODO: make sure nationality format is same everywhere
-# 	investor.nationality = self.nationality
-# 	# update user verification level
-# 	investor.verification_level = 4
-# 	# save
-# 	self.save()
-# 	# TODO: send email to user for the status updating
-# 	investor.save()
-#
-# def unverify_identity(self):
-# 	# cache
-# 	investor = self.investor_user
-# 	# update verification status
-# 	self.is_verified = True
-# 	# update user verification level
-# 	investor.verification_level = 2
-# 	# save
-# 	self.save()
-# 	# TODO: send email to user for the status updating
-# 	investor.save()
 
 
 class InvestorVerification(models.Model):
