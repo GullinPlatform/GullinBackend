@@ -611,12 +611,13 @@ class UserViewSet(viewsets.ViewSet):
 			if res['state'] == 'A':
 				form_data['tid'] = res['tid']
 
-				if form_data['docCountry'] == 'US':
-					form_data['stage'] = 2
-				elif form_data['docCountry'] in ['AU', 'CA', 'DK', 'NL', 'ZA', 'SE', 'UK']:
-					form_data['stage'] = 3
-				else:
-					form_data['stage'] = 4
+				# if form_data['docCountry'] == 'US':
+				# 	form_data['stage'] = 2
+				# elif form_data['docCountry'] in ['AU', 'CA', 'DK', 'NL', 'ZA', 'SE', 'UK']:
+				# 	form_data['stage'] = 3
+				# else:
+				# 	form_data['stage'] = 4
+				form_data['stage'] = 4
 
 				res = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
 				# print(res.text)
