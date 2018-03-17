@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
 	# installed packages
-	'django_celery_results',
+	# 'django_celery_results',
 	'corsheaders',
 	# customized utils
 	'Gullin.utils.rest_framework_jwt',
