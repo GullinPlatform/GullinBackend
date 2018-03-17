@@ -176,9 +176,8 @@ class IDVerificationAdmin(admin.ModelAdmin):
 	# Detail Page Settings
 	fieldsets = (
 		('Base User', {'fields': ('investor_user_link',)}),
-		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_back', 'user_holding_official_id',)}),
-		('Nationality', {'fields': ('nationality',)}),
-		('Verify', {'fields': ('tid', 'stage', 'state', 'note')}),
+		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_front_base64', 'official_id_back', 'user_holding_official_id',)}),
+		('Verify', {'fields': ('tid', 'stage', 'state', 'note', 'processed',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
 	readonly_fields = ('created', 'updated', 'investor_user_link')

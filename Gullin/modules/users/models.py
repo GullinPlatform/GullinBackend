@@ -12,7 +12,6 @@ from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 
 from Gullin.utils.upload_dir import user_avatar_dir, official_id_dir
-from Gullin.utils.send.email import send_email
 
 
 class UserManager(BaseUserManager):
@@ -252,15 +251,21 @@ class IDVerification(models.Model):
 
 	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
+	# File
 	official_id_front = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 	official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 	user_holding_official_id = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
-	nationality = models.CharField(max_length=20, null=True, blank=True)
 
-	# Transaction ID
+	# Base64
+	official_id_front_base64 = models.TextField(null=True, blank=True)
+	official_id_back_base64 = models.TextField(null=True, blank=True)
+	user_holding_official_id_base64 = models.TextField(null=True, blank=True)
+
+	# Transaction Detail
 	tid = models.CharField(max_length=40, null=True, blank=True)
 	stage = models.IntegerField(default=0)
-	state = models.CharField(max_length=20, default='R')
+	state = models.CharField(max_length=20, null=True, blank=True)
+	processed = models.BooleanField(default=False)
 
 	# Note
 	note = models.TextField(null=True, blank=True)
