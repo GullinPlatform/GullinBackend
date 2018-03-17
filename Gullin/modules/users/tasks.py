@@ -55,9 +55,6 @@ def check_verification_status():
 
 			id_verification.stage = 4
 			id_verification.state = ''
-			id_verification.official_id_front_base64 = ''
-			id_verification.official_id_back_base64 = ''
-			id_verification.user_holding_official_id_base64 = ''
 			id_verification.save()
 
 		elif id_verification.state == 'R':
@@ -107,6 +104,11 @@ def check_verification_status():
 
 			# Update ID verification instance
 			id_verification.processed = True
+			id_verification.state = res['state']
+			id_verification.note = res
+			id_verification.official_id_front_base64 = ''
+			id_verification.official_id_back_base64 = ''
+			id_verification.user_holding_official_id_base64 = ''
 			id_verification.save()
 
 		elif res['state'] == 'R':
@@ -120,16 +122,22 @@ def check_verification_status():
 
 			# Update ID verification instance
 			id_verification.processed = True
+			id_verification.note = res
+			id_verification.state = res['state']
 			id_verification.save()
 
 		elif res['state'] == 'D':
-			id_verification.processed = True
-			id_verification.save()
 			# Send an email to user to inform that the KYC is rejected
 			ctx = {
 				'user_full_name': investor.full_name,
 				'user_email'    : user.email
 			}
 			send_email([user.email], 'Gullin - ID Verification Failed', 'kyc_failed', ctx)
+
+			# Update ID verification instance
+			id_verification.processed = True
+			id_verification.note = res
+			id_verification.state = res['state']
+			id_verification.save()
 
 	return 'Finished'
