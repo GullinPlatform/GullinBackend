@@ -216,6 +216,6 @@ CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
 	'check_verification_status': {
 		'task'    : 'Gullin.modules.users.tasks.check_verification_status',
-		'schedule': 30.0,
+		'schedule': 300.0,
 	},
 }
