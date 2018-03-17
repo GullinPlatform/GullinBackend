@@ -97,7 +97,8 @@ class FullIDVerificationSerializer(serializers.ModelSerializer):
 		model = IDVerification
 		fields = ('investor_user',
 		          'official_id_type', 'official_id_back', 'official_id_front', 'user_holding_official_id',
-		          'nationality', 'created', 'updated',)
+		          'official_id_back_base64', 'official_id_front_base64', 'user_holding_official_id_base64',
+		          'created', 'updated',)
 		read_only_fields = ('created', 'updated',)
 
 
