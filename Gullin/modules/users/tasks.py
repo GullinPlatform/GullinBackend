@@ -10,7 +10,6 @@ from Gullin.celery import app
 
 @app.task
 def check_verification_status():
-	print('running')
 	# API
 	stage_api = 'https://staging.identitymind.com/im/account/consumer'
 	# Get all stage 1 not finalized verifications
@@ -95,7 +94,7 @@ def check_verification_status():
 			investor.verification_level = 4
 			investor.save()
 
-			# Send an email to user to inform that the KYC is rejected
+			# Send an email to user to inform that the KYC is successful
 			ctx = {
 				'user_full_name': investor.full_name,
 				'user_email'    : user.email
