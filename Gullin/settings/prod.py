@@ -29,7 +29,7 @@ INSTALLED_APPS = [
 	'django.contrib.messages',
 	'django.contrib.staticfiles',
 	# installed packages
-	'djcelery_email',
+	# 'django_celery_results',
 	'corsheaders',
 	# customized utils
 	'Gullin.utils.rest_framework_jwt',
@@ -203,3 +203,19 @@ AWS_SNS_REGION_NAME = 'us-east-1'
 
 # Set Max Data Upload Size to 5MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
+
+# Set IdentityMind API Endpoint
+IDENTITY_MIND_API = ''
+
+# Celery
+# CELERY_RESULT_BACKEND = 'django-db'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+CELERY_BEAT_SCHEDULE = {
+	'check_verification_status': {
+		'task'    : 'Gullin.modules.users.tasks.check_verification_status',
+		'schedule': 300.0,
+	},
+}

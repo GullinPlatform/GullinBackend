@@ -22,7 +22,7 @@ from Gullin.utils.send.email import send_email
 from Gullin.utils.send.sms import send_sms
 
 from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer, FullUserLogVerificationSerializer
-from .models import InvestorUser, User, InvestorUserAddress, UserLog
+from .models import InvestorUser, User, InvestorUserAddress, UserLog, IDVerification
 from ..wallets.models import Wallet
 
 
@@ -532,112 +532,92 @@ class UserViewSet(viewsets.ViewSet):
 			return Response(status=status.HTTP_200_OK)
 
 	def id_verification(self, request):
-		# request.data needs 'official_id_type', 'official_id_back', 'official_id_front', 'user_holding_official_id', 'investor_user'
-
-		# copy the form data
+		# Copy the form data
 		form_data = request.data.copy()
+		investor = request.user.investor
+		investor_address = investor.address.first()
 
 		# recreate id_front_file file by decoding base64
 		if request.data['official_id_front']:
-			format, imgstr = form_data['official_id_front'].split(';base64,')
-			ext = format.split('/')[-1]
-			id_front_file = ContentFile(base64.b64decode(imgstr), name='front.' + ext)
+			form_data['official_id_front_base64'] = request.data['official_id_front']
+			img_format, img_str = form_data['official_id_front'].split(';base64,')
+			img_ext = img_format.split('/')[-1]
+			id_front_file = ContentFile(base64.b64decode(img_str), name='front.' + img_ext)
 			form_data['official_id_front'] = id_front_file
 
 		# recreate id_back_file file by decoding base64
 		if request.data['official_id_back']:
-			format, imgstr = form_data['official_id_back'].split(';base64,')
-			ext = format.split('/')[-1]
-			id_back_file = ContentFile(base64.b64decode(imgstr), name='back.' + ext)
+			form_data['official_id_back_base64'] = request.data['official_id_back']
+			img_format, img_str = form_data['official_id_back'].split(';base64,')
+			img_ext = img_format.split('/')[-1]
+			id_back_file = ContentFile(base64.b64decode(img_str), name='back.' + img_ext)
 			form_data['official_id_back'] = id_back_file
 
 		# recreate id_holding_file file by decoding base64
 		if request.data['user_holding_official_id']:
-			format, imgstr = form_data['user_holding_official_id'].split(';base64,')
-			ext = format.split('/')[-1]
-			id_holding_file = ContentFile(base64.b64decode(imgstr), name='hold.' + ext)
+			form_data['user_holding_official_id_base64'] = request.data['user_holding_official_id']
+			img_format, img_str = form_data['user_holding_official_id'].split(';base64,')
+			img_ext = img_format.split('/')[-1]
+			id_holding_file = ContentFile(base64.b64decode(img_str), name='hold.' + img_ext)
 			form_data['user_holding_official_id'] = id_holding_file
 
-		serializer = FullIDVerificationSerializer(data=form_data)
-		if serializer.is_valid(raise_exception=True):
-			id_verification_instance = serializer.save()
-			investor = request.user.investor
-			investor_address = investor.address.first()
-
-			form_data = {
-				'man'              : request.user.email,
-				'tea'              : request.user.email,
-
-				'bfn'              : investor.first_name,
-				'bln'              : investor.last_name,
-				'dob'              : investor.birthday.isoformat(),
-
-				'bsn'              : investor_address.address1 + ', ' + investor_address.address2,
-				'bc'               : investor_address.city,
-				'bs'               : investor_address.state,
-				'bz'               : investor_address.zipcode,
-				'bco'              : country_utils.get_ISO3166_code_by_country_name(investor_address.country),
-
-				'docType'          : request.data['official_id_type'],
-				'docCountry'       : country_utils.get_ISO3166_code_by_country_name(investor.nationality),
-				'scanData'         : request.data['official_id_front'],
-				'backsideImageData': request.data['official_id_back'] if request.data['official_id_back'] else '',
-				'faceImages'       : [
-					request.data['user_holding_official_id'],
-				],
-
-				'ip'               : request.user.last_login_ip,
-				'phn'              : request.user.phone_country_code + request.user.phone,
-
-				'stage'            : 1,
-			}
-
-			stage_api = 'https://staging.identitymind.com/im/account/consumer'
-			res = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
-			# print(res.text)
-
-			res = json.loads(res.text)
-			id_verification_instance.tid = res['tid']
-			id_verification_instance.note = res
-			id_verification_instance.stage = 1
-			id_verification_instance.state = res['state']
-
-			ctx = {
-				'user_full_name': investor.full_name,
-				'user_email'    : request.user.email
-			}
-			send_email([request.user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
-
-			if res['state'] == 'A':
-				form_data['tid'] = res['tid']
-
-				# if form_data['docCountry'] == 'US':
-				# 	form_data['stage'] = 2
-				# elif form_data['docCountry'] in ['AU', 'CA', 'DK', 'NL', 'ZA', 'SE', 'UK']:
-				# 	form_data['stage'] = 3
-				# else:
-				# 	form_data['stage'] = 4
-				form_data['stage'] = 4
-
-				res = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
-				# print(res.text)
-				res = json.loads(res.text)
-
-				id_verification_instance.tid = res['tid']
-				id_verification_instance.note = res
-				id_verification_instance.stage = form_data['stage']
-				id_verification_instance.state = res['state']
+		id_verification_instance = IDVerification.objects.filter(investor_user_id=investor.id).first()
+		if id_verification_instance:
+			serializer = FullIDVerificationSerializer(id_verification_instance, data=form_data, partial=True)
+			if serializer.is_valid(raise_exception=True):
+				id_verification_instance = serializer.save()
 			else:
-				# TODO: send user email and inform that the kyc failed
-				pass
-
-			id_verification_instance.save()
-
-			investor.verification_level = 3
-			investor.save()
-			return Response(status=status.HTTP_201_CREATED)
+				return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 		else:
-			return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+			serializer = FullIDVerificationSerializer(data=form_data)
+			if serializer.is_valid(raise_exception=True):
+				id_verification_instance = serializer.save()
+			else:
+				return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+		form_data = {
+			'man'  : request.user.email,
+			'tea'  : request.user.email,
+
+			'bfn'  : investor.first_name,
+			'bln'  : investor.last_name,
+			'dob'  : investor.birthday.isoformat(),
+
+			'bsn'  : investor_address.address1 + ', ' + investor_address.address2,
+			'bc'   : investor_address.city,
+			'bs'   : investor_address.state,
+			'bz'   : investor_address.zipcode,
+			'bco'  : country_utils.get_ISO3166_code_by_country_name(investor_address.country),
+
+			'ip'   : request.user.last_login_ip,
+			'phn'  : request.user.phone_country_code + request.user.phone,
+
+			'stage': 1,
+		}
+
+		stage_api = 'https://staging.identitymind.com/im/account/consumer'
+		res = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
+		# print(res.text)
+
+		res = json.loads(res.text)
+
+		# save transaction id, response and stage
+		id_verification_instance.tid = res['tid']
+		id_verification_instance.note = res
+		id_verification_instance.stage = 1
+		id_verification_instance.state = res['state']
+		id_verification_instance.save()
+
+		# send notification email to user
+		ctx = {
+			'user_full_name': investor.full_name,
+			'user_email'    : request.user.email
+		}
+		send_email([request.user.email], 'Gullin - ID Verification Request Received', 'kyc_processing', ctx)
+
+		investor.verification_level = 3
+		investor.save()
+		return Response(status=status.HTTP_201_CREATED)
 
 	def accredited_investor_verification(self, request):
 		if request.user.investor.verification_level == 4 and request.user.investor.nationality == 'United States':
