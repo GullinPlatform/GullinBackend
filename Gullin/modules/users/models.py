@@ -267,7 +267,7 @@ class IDVerification(models.Model):
 	# Transaction Detail
 	tid = models.CharField(max_length=40, null=True, blank=True)
 	stage = models.IntegerField(default=0)
-	state = models.CharField(choices=ID_VERIFICATION_STATE, null=True, blank=True)
+	state = models.CharField(choices=ID_VERIFICATION_STATE, max_length=10, null=True, blank=True)
 	processed = models.BooleanField(default=False)
 
 	# Note
