@@ -72,12 +72,17 @@ def check_verification_status():
 			# If the verification is denied, send email to notice user their id verification failed
 			id_verification.processed = True
 			id_verification.save()
+
 			# Send an email to user to inform that the KYC is rejected
 			ctx = {
 				'user_full_name': investor.full_name,
 				'user_email'    : user.email
 			}
 			send_email([user.email], 'Gullin - ID Verification Failed', 'kyc_failed', ctx)
+
+			# Reset User level
+			investor.verification_level = 2
+			investor.save()
 
 	# Get all stage 4 not finalized verifications
 	verifications = IDVerification.objects.filter(processed=False, stage=4)
@@ -138,5 +143,9 @@ def check_verification_status():
 			id_verification.note = res
 			id_verification.state = res['state']
 			id_verification.save()
+
+			# Reset User level
+			investor.verification_level = 2
+			investor.save()
 
 	return 'Finished'
