@@ -435,7 +435,7 @@ class UserSignUpFollowUpViewSet(viewsets.ViewSet):
 
 	def save_wallet_address(self, request):
 		investor = request.user.investor
-		if investor.wallet.eth_address:
+		if investor.wallet.eth_address and investor.verification_level == 2:
 			return Response({'error': 'Your are already bound with a wallet'}, status=status.HTTP_403_FORBIDDEN)
 		else:
 			investor.wallet.eth_address = request.data.get('eth_address')
