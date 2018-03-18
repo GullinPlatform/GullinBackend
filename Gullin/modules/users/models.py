@@ -246,6 +246,9 @@ class IDVerification(models.Model):
 	ID_TYPE_CHOICES = (('DL', 'Driver License'),
 	                   ('ID', 'Photo ID'),
 	                   ('PP', 'Passport'))
+	ID_VERIFICATION_STATE = (('A', 'Accepted'),
+	                         ('R', 'Under Review'),
+	                         ('D', 'Rejected'),)
 
 	investor_user = models.OneToOneField('InvestorUser', related_name='id_verification', on_delete=models.CASCADE, null=True, blank=True)
 
@@ -264,7 +267,7 @@ class IDVerification(models.Model):
 	# Transaction Detail
 	tid = models.CharField(max_length=40, null=True, blank=True)
 	stage = models.IntegerField(default=0)
-	state = models.CharField(max_length=20, null=True, blank=True)
+	state = models.CharField(choices=ID_VERIFICATION_STATE, null=True, blank=True)
 	processed = models.BooleanField(default=False)
 
 	# Note
