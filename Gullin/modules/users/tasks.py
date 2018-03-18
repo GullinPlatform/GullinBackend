@@ -64,7 +64,7 @@ def check_verification_status():
 			ctx = {
 				'title'  : 'A KYC Request Needs Manual Review (Stage 1)',
 				'content': 'IdentityMind Transaction ID: ' + id_verification.tid + '\n' +
-				           'ID Verification URL: https://api.gullin.io/juM8A43L9GZ7/users/idverification/' + id_verification.id + '/change/'
+				           'ID Verification URL: https://api.gullin.io/juM8A43L9GZ7/users/idverification/' + str(id_verification.id) + '/change/'
 			}
 			send_email(['team@gullin.io'], 'A KYC Request Needs Manual Review', 'gullin_team_notification', ctx)
 
@@ -115,7 +115,7 @@ def check_verification_status():
 			ctx = {
 				'title'  : 'A KYC Request Needs Manual Review (Stage 4)',
 				'content': 'IdentityMind Transaction ID: ' + id_verification.tid + '\n' +
-				           'ID Verification URL: https://api.gullin.io/juM8A43L9GZ7/users/idverification/' + id_verification.id + '/change/'
+				           'ID Verification URL: https://api.gullin.io/juM8A43L9GZ7/users/idverification/' + str(id_verification.id) + '/change/'
 			}
 			send_email(['team@gullin.io'], 'A KYC Request Needs Manual Review', 'gullin_team_notification', ctx)
 
