@@ -85,8 +85,8 @@ class InvestorUserAdmin(admin.ModelAdmin):
 
 	def address_link(self, obj):
 		if obj.address:
-			change_url = reverse('admin:users_investoraddress_change', args=(obj.address.id,))
-			return mark_safe('<a href="%s">%s</a>' % (change_url, 'Address'))
+			change_url = reverse('admin:users_investoruseraddress_change', args=(obj.address.first().id,))
+			return mark_safe('<a href="%s">%s</a>' % (change_url, 'Check Address'))
 		else:
 			return '-'
 
