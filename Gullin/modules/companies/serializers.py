@@ -9,7 +9,7 @@ class FullTokenDetailSerializer(serializers.ModelSerializer):
 		fields = ('token_code', 'token_logo', 'erc20_compliant',
 		          'start_datetime', 'end_datetime', 'is_finished',
 		          'ico_token_type', 'ico_stage_type',
-		          'price', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution',
+		          'price', 'price_unit', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution',
 		          'threshold', 'restrictions', 'bonus', 'restricted_country_list',
 		          'crowd_sale_contract_address', 'token_address', 'decimals',
 		          'created', 'updated',)
@@ -25,7 +25,7 @@ class MiniTokenDetailSerializer(serializers.ModelSerializer):
 class BalanceTokenDetailSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = TokenDetail
-		fields = ('token_code', 'token_name', 'token_address', 'decimals', 'price',)
+		fields = ('token_code', 'token_name', 'token_address', 'decimals', 'price', 'price_unit')
 
 
 class FullPressReleaseSerializer(serializers.ModelSerializer):
