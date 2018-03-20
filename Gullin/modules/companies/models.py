@@ -62,7 +62,10 @@ class TokenDetail(models.Model):
 		(0, 'Pre-Sale'),
 		(1, 'Crowd-Sale'),
 	)
-
+	PRICE_UNIT_CHOICES = (
+		('ETH', 'ETH'),
+		('USD', 'USD')
+	)
 	# Token Detail
 	token_code = models.CharField(max_length=10)
 	token_name = models.CharField(max_length=140)
@@ -80,6 +83,8 @@ class TokenDetail(models.Model):
 
 	# Tokenomics
 	price = models.FloatField(null=True, blank=True)
+	price_unit = models.FloatField(choices=PRICE_UNIT_CHOICES, max_length=10, default='ETH')
+
 	total_token_supply = models.BigIntegerField(null=True, blank=True)
 
 	soft_market_cap = models.FloatField(null=True, blank=True)
