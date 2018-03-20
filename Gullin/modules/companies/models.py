@@ -83,7 +83,7 @@ class TokenDetail(models.Model):
 
 	# Tokenomics
 	price = models.FloatField(null=True, blank=True)
-	price_unit = models.FloatField(choices=PRICE_UNIT_CHOICES, max_length=10, default='ETH')
+	price_unit = models.CharField(choices=PRICE_UNIT_CHOICES, max_length=10, default='ETH')
 
 	total_token_supply = models.BigIntegerField(null=True, blank=True)
 
