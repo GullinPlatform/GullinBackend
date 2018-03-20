@@ -169,7 +169,7 @@ class InvestorUserAddressAdmin(admin.ModelAdmin):
 @admin.register(IDVerification)
 class IDVerificationAdmin(admin.ModelAdmin):
 	# List display Settings
-	list_display = ('id', 'investor_user', 'official_id_type', 'created', 'updated',)
+	list_display = ('id', 'investor_user', 'official_id_type', 'stage', 'state', 'processed',)
 	search_fields = ('investor_user',)
 	ordering = ('created',)
 

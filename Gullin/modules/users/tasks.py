@@ -31,7 +31,7 @@ def check_verification_status():
 				'bln'              : investor.last_name,
 				'dob'              : investor.birthday.isoformat(),
 
-				'bsn'              : investor_address.address1 + ', ' + investor_address.address2 if investor_address.address2 else '',
+				'bsn'              : (investor_address.address1 + ', ') + (investor_address.address2 if investor_address.address2 else ''),
 				'bc'               : investor_address.city,
 				'bs'               : investor_address.state,
 				'bz'               : investor_address.zipcode,
