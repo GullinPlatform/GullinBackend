@@ -98,7 +98,7 @@ class TokenDetailAdmin(admin.ModelAdmin):
 		('Token Detail', {'fields': ('token_name', 'token_code', 'token_logo', 'erc20_compliant',)}),
 		('ICO Type', {'fields': ('ico_token_type', 'ico_stage_type',)}),
 		('ICO Time', {'fields': ('start_datetime', 'end_datetime', 'is_finished')}),
-		('Tokenomics', {'fields': ('price', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution')}),
+		('Tokenomics', {'fields': ('price', 'price_unit', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution')}),
 		('Investment', {'fields': ('threshold', 'bonus', 'restrictions', 'restricted_country_list', 'accredited_investors', 'accredited_investors_country_list')}),
 		('Smart Contract Info', {'fields': ('crowd_sale_contract_address', 'token_address', 'decimals',)}),
 		('ICO Stage', {'fields': ('is_finished',)}),
