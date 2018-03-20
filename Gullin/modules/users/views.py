@@ -606,6 +606,7 @@ class UserViewSet(viewsets.ViewSet):
 		id_verification_instance.note = res
 		id_verification_instance.stage = 1
 		id_verification_instance.state = res['state']
+		id_verification_instance.processed = False
 		id_verification_instance.save()
 
 		# send notification email to user
