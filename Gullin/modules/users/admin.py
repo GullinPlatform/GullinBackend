@@ -176,15 +176,20 @@ class IDVerificationAdmin(admin.ModelAdmin):
 	# Detail Page Settings
 	fieldsets = (
 		('Base User', {'fields': ('investor_user_link',)}),
-		('ID Info', {'fields': ('official_id_type', 'official_id_front', 'official_id_front_base64', 'official_id_back', 'user_holding_official_id',)}),
-		('Verify', {'fields': ('tid', 'stage', 'state', 'note', 'processed',)}),
+		('ID Info', {'fields': ('official_id_type',)}),
+		('Process Info', {'fields': ('tid', 'stage', 'state', 'note', 'processed', 'cache_cleaned',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
 	)
-	readonly_fields = ('created', 'updated', 'investor_user_link')
+	readonly_fields = ('created', 'updated', 'investor_user_link', 'cache_cleaned')
 
 	def investor_user_link(self, obj):
 		change_url = reverse('admin:users_investoruser_change', args=(obj.investor_user.id,))
 		return mark_safe('<a href="%s">%s</a>' % (change_url, obj.investor_user.full_name))
+
+	def cache_cleaned(self, obj):
+		if obj.official_id_front_base64 or obj.official_id_back_base64 or obj.user_holding_official_id_base64:
+			return False
+		return True
 
 
 @admin.register(InvestorVerification)
