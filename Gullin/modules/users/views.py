@@ -1,11 +1,13 @@
 import json
-import base64
+# import base64
 import requests
 
 from django.utils import timezone
 from django.db.utils import IntegrityError
 from django.contrib.gis.geoip2 import GeoIP2
-from django.core.files.base import ContentFile
+from django.conf import settings
+
+# from django.core.files.base import ContentFile
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -537,44 +539,49 @@ class UserViewSet(viewsets.ViewSet):
 		investor = request.user.investor
 		investor_address = investor.address.first()
 
-		# recreate id_front_file file by decoding base64
-		if request.data['official_id_front']:
-			form_data['official_id_front_base64'] = request.data['official_id_front']
-			img_format, img_str = form_data['official_id_front'].split(';base64,')
-			img_ext = img_format.split('/')[-1]
-			id_front_file = ContentFile(base64.b64decode(img_str), name='front.' + img_ext)
-			form_data['official_id_front'] = id_front_file
+		# # recreate id_front_file file by decoding base64
+		# if request.data['official_id_front']:
+		# 	form_data['official_id_front_base64'] = request.data['official_id_front']
+		# 	# img_format, img_str = form_data['official_id_front'].split(';base64,')
+		# 	# img_ext = img_format.split('/')[-1]
+		# 	# id_front_file = ContentFile(base64.b64decode(img_str), name='front.' + img_ext)
+		# 	# form_data['official_id_front'] = id_front_file
+		#
+		# # recreate id_back_file file by decoding base64
+		# if request.data['official_id_back']:
+		# 	form_data['official_id_back_base64'] = request.data['official_id_back']
+		# 	# img_format, img_str = form_data['official_id_back'].split(';base64,')
+		# 	# img_ext = img_format.split('/')[-1]
+		# 	# id_back_file = ContentFile(base64.b64decode(img_str), name='back.' + img_ext)
+		# 	# form_data['official_id_back'] = id_back_file
+		#
+		# # recreate id_holding_file file by decoding base64
+		# if request.data['user_holding_official_id']:
+		# 	form_data['user_holding_official_id_base64'] = request.data['user_holding_official_id']
+		# 	# img_format, img_str = form_data['user_holding_official_id'].split(';base64,')
+		# 	# img_ext = img_format.split('/')[-1]
+		# 	# id_holding_file = ContentFile(base64.b64decode(img_str), name='hold.' + img_ext)
+		# 	# form_data['user_holding_official_id'] = id_holding_file
 
-		# recreate id_back_file file by decoding base64
-		if request.data['official_id_back']:
-			form_data['official_id_back_base64'] = request.data['official_id_back']
-			img_format, img_str = form_data['official_id_back'].split(';base64,')
-			img_ext = img_format.split('/')[-1]
-			id_back_file = ContentFile(base64.b64decode(img_str), name='back.' + img_ext)
-			form_data['official_id_back'] = id_back_file
-
-		# recreate id_holding_file file by decoding base64
-		if request.data['user_holding_official_id']:
-			form_data['user_holding_official_id_base64'] = request.data['user_holding_official_id']
-			img_format, img_str = form_data['user_holding_official_id'].split(';base64,')
-			img_ext = img_format.split('/')[-1]
-			id_holding_file = ContentFile(base64.b64decode(img_str), name='hold.' + img_ext)
-			form_data['user_holding_official_id'] = id_holding_file
-
-		id_verification_instance = IDVerification.objects.filter(investor_user_id=investor.id).first()
-		if id_verification_instance:
-			serializer = FullIDVerificationSerializer(id_verification_instance, data=form_data, partial=True)
+		# Check if user already has id verification
+		id_verification = IDVerification.objects.filter(investor_user_id=investor.id).first()
+		# If has
+		if id_verification:
+			# Update it
+			serializer = FullIDVerificationSerializer(id_verification, data=form_data, partial=True)
 			if serializer.is_valid(raise_exception=True):
-				id_verification_instance = serializer.save()
+				id_verification = serializer.save()
 			else:
 				return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 		else:
+			# Else create a new one
 			serializer = FullIDVerificationSerializer(data=form_data)
 			if serializer.is_valid(raise_exception=True):
-				id_verification_instance = serializer.save()
+				id_verification = serializer.save()
 			else:
 				return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+		# Form data for stage 1 checking
 		form_data = {
 			'man'  : request.user.email,
 			'tea'  : request.user.email,
@@ -594,20 +601,18 @@ class UserViewSet(viewsets.ViewSet):
 
 			'stage': 1,
 		}
-
-		stage_api = 'https://staging.identitymind.com/im/account/consumer'
-		res = requests.request('POST', stage_api, auth=('gullin', '705a2aebf77417a4aaaab789ec318ae7cab87413'), json=form_data)
-		# print(res.text)
-
+		# Send request
+		res = requests.request('POST', settings.IDENTITY_MIND_API, auth=('gullin', settings.IDENTITY_MIND_KEY), json=form_data)
+		# Get response
 		res = json.loads(res.text)
 
-		# save transaction id, response and stage
-		id_verification_instance.tid = res['tid']
-		id_verification_instance.note = res
-		id_verification_instance.stage = 1
-		id_verification_instance.state = res['state']
-		id_verification_instance.processed = False
-		id_verification_instance.save()
+		# Save transaction id, response and stage
+		id_verification.tid = res['tid']
+		id_verification.stage = 1
+		id_verification.state = res['state']
+		id_verification.note = res
+		id_verification.processed = False
+		id_verification.save()
 
 		# send notification email to user
 		ctx = {

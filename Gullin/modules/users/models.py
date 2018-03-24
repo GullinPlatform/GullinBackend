@@ -255,11 +255,11 @@ class IDVerification(models.Model):
 	# Verification Info
 	official_id_type = models.CharField(max_length=20, choices=ID_TYPE_CHOICES)
 	# File
-	official_id_front = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
-	official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
-	user_holding_official_id = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
+	# official_id_front = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
+	# official_id_back = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
+	# user_holding_official_id = models.FileField(upload_to=official_id_dir, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 
-	# Base64
+	# Base64 Cache
 	official_id_front_base64 = models.TextField(null=True, blank=True)
 	official_id_back_base64 = models.TextField(null=True, blank=True)
 	user_holding_official_id_base64 = models.TextField(null=True, blank=True)
