@@ -146,7 +146,7 @@ class UserAuthViewSet(viewsets.ViewSet):
 							'verification_code': verification_code.code,
 							'user_email'       : user.email
 						}
-						send_email([user.email], 'Gullin - Welcome! Please Verify Your Email', 'welcome_and_email_verification', ctx)
+						send_email([user.email], 'Gullin - Verification Code', 'verification_code', ctx)
 
 						msg = {'data': 'We have sent a verification code to your email, please verify.'}
 				# If user enabled TOTP
