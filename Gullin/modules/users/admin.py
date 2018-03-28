@@ -30,6 +30,7 @@ class UserAdmin(BaseUserAdmin):
 	fieldsets = (
 		('User Info', {'fields': ('email', 'phone_country_code', 'phone', 'password',)}),
 		('User Extension', {'fields': ('edit_investor',)}),
+		('Reference', {'fields': ('refer_source',)}),
 		('Permissions', {'fields': ('is_investor', 'is_company_user', 'is_analyst', 'is_active', 'is_staff',)}),
 		('Security', {'fields': ('last_login', 'last_login_ip', 'TOTP_enabled',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
