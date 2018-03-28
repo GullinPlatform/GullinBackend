@@ -82,5 +82,5 @@ urlpatterns = [
 	path('me/log/', user_log, name='user_log'),
 	path('me/change_password/', user_change_password, name='user_change_password'),
 
-	path('send_kyc_email/<type>/<email>', send_kyc_email)
+	# path('send_kyc_email/<type>/<email>', send_kyc_email)
 ]
