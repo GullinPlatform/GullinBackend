@@ -59,6 +59,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 	phone_country_code = models.CharField(max_length=30, null=True, blank=True)
 	phone = models.CharField(max_length=30, null=True, blank=True)
 
+	# Reference
+	refer_source = models.CharField(max_length=30, null=True, blank=True)
+
 	# Security
 	last_login = models.DateTimeField(default=timezone.now)
 	last_login_ip = models.GenericIPAddressField(null=True, blank=True)
