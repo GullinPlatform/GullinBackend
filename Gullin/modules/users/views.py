@@ -649,11 +649,32 @@ class UserViewSet(viewsets.ViewSet):
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 	def log(self, request):
-		serializer = FullUserLogVerificationSerializer(request.user.logs, many=True)
+		# Return user log, the default page size is 50
+		# Params:
+		# 1. q, query_param, int
+		page = request.query_params.get('p', 0)
+		serializer = FullUserLogVerificationSerializer(request.user.logs, many=True)[page * 50:page * 50 + 50]
 		return Response(serializer.data)
 
 	def change_password(self, request):
-		pass
+		# If current_password or new_password not in request form
+		if (not request.data['current_password']) or (not request.data['new_password']):
+			# Return error message with status code 400
+			return Response({'error': 'Form wrong format'}, status=status.HTTP_400_BAD_REQUEST)
+		try:
+			#  if old-password match
+			if check_password(request.data['current_password'], request.user.password):
+				# change user password
+				request.user.set_password(request.data['new_password'])
+				request.user.save()
+				return Response(status=status.HTTP_200_OK)
+			else:
+				# else return with error message and status code 400
+				return Response({'error': 'Current password not match'}, status=status.HTTP_400_BAD_REQUEST)
+		except:
+			# If exception return with status 400
+			return Response({'error': 'Failed to update password'}, status=status.HTTP_400_BAD_REQUEST)
+
 # # TODO delete
 # @api_view(['GET'])
 # def send_kyc_email(request, type, email):
