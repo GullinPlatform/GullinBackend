@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import UserAuthViewSet, UserSignUpFollowUpViewSet, UserViewSet, send_kyc_email
+from .views import UserAuthViewSet, UserSignUpFollowUpViewSet, UserViewSet  # , send_kyc_email
 
 user_login = UserAuthViewSet.as_view({
 	'post' : 'log_in',
