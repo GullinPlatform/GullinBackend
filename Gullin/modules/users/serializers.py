@@ -48,7 +48,8 @@ class CreateUserSerializer(serializers.ModelSerializer):
 	def create(self, validated_data):
 		user = User(
 			email=validated_data['email'],
-			last_login_ip=validated_data['last_login_ip']
+			last_login_ip=validated_data['last_login_ip'],
+			refer_source=validated_data['refer_source']
 		)
 		user.set_password(validated_data['password'])
 		user.save()
