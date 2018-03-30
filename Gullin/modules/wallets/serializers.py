@@ -22,7 +22,6 @@ class FullTransactionSerializer(serializers.ModelSerializer):
 
 	# Add description label for transaction model
 	def create(self, validated_data):
-		print(validated_data)
 		# If no mark on from address type
 		if not validated_data.get('from_address_type'):
 			token = TokenDetail.objects.filter(token_address=validated_data['from_address'])
