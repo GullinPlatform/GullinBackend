@@ -653,7 +653,8 @@ class UserViewSet(viewsets.ViewSet):
 		# Params:
 		# 1. q, query_param, int
 		page = request.query_params.get('p', 0)
-		serializer = FullUserLogVerificationSerializer(request.user.logs, many=True)[page * 50:page * 50 + 50]
+		logs = request.user.logs.all()[page * 50:page * 50 + 50]
+		serializer = FullUserLogVerificationSerializer(logs, many=True)
 		return Response(serializer.data)
 
 	def change_password(self, request):
