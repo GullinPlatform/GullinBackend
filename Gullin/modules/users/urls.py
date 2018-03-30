@@ -38,8 +38,8 @@ user_verify_phone = UserSignUpFollowUpViewSet.as_view({
 	'patch': 'verify_phone'
 })
 
-user_resend_verification_code = UserSignUpFollowUpViewSet.as_view({
-	'post': 'resend_code'
+user_send_verification_code = UserViewSet.as_view({
+	'post': 'send_verification_code'
 })
 
 user_me = UserViewSet.as_view({
@@ -72,7 +72,7 @@ urlpatterns = [
 
 	path('followup/email/', user_verify_email, name='user_verify_email'),
 	path('followup/phone/', user_verify_phone, name='user_verify_phone'),
-	path('followup/resend/', user_resend_verification_code, name='user_resend_verification_code'),
+	path('followup/resend/', user_send_verification_code, name='user_send_verification_code'),
 	path('followup/wallet_address/', user_wallet_address, name='user_wallet_address'),
 
 	path('verify/upload_id/', user_id_verification, name='user_id_verification'),
