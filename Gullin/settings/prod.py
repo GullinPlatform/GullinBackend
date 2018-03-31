@@ -205,7 +205,7 @@ AWS_SNS_REGION_NAME = 'us-east-1'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
 # Set IdentityMind API Endpoint
-IDENTITY_MIND_API = 'https://staging.identitymind.com/im/account/consumer'
+IDENTITY_MIND_API = 'https://edna.identitymind.com/im/account/consumer'
 IDENTITY_MIND_KEY = open(os.path.join(BASE_DIR, 'settings/securities/im_api_key')).read()
 
 # Celery

@@ -117,3 +117,5 @@ Gullin/modules/companies/migrations/
 ~Gullin/modules/wallets/migrations/__init__.py
 ~Gullin/modules/users/migrations/__init__.py
 ~Gullin/modules/companies/migrations/__init__.py
+
+celerybeat-schedule\.db
