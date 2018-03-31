@@ -1,16 +1,17 @@
+from __future__ import absolute_import, unicode_literals
 import json
 import requests
 
+from celery import shared_task
 from django.conf import settings
 
 from .models import IDVerification
 
 from Gullin.utils.country_code import country_utils
 from Gullin.utils.send.email import send_email
-from Gullin.celery import app
 
 
-@app.task
+@shared_task
 def check_verification_status():
 	log = []
 
@@ -21,6 +22,7 @@ def check_verification_status():
 		user = investor.user
 		# Send check states request
 		res = requests.request('GET', settings.IDENTITY_MIND_API + '/' + id_verification.tid, auth=('gullin', settings.IDENTITY_MIND_KEY))
+		# print(settings.IDENTITY_MIND_API + '/' + id_verification.tid, settings.IDENTITY_MIND_KEY)
 		res = json.loads(res.text)
 
 		# If application gets approved
