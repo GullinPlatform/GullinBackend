@@ -21,7 +21,7 @@ class UserAdmin(BaseUserAdmin):
 	)
 
 	# List display Settings
-	list_display = ('id', 'email', 'phone', 'created', 'last_login_ip',)
+	list_display = ('id', 'email', 'phone', 'created', 'refer_source', 'last_login_ip',)
 	search_fields = ('email', 'phone',)
 	list_filter = ('created',)
 	ordering = ('created',)
