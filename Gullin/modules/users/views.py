@@ -22,7 +22,7 @@ from Gullin.utils.country_code import country_utils
 from Gullin.utils.send.email import send_email
 from Gullin.utils.send.sms import send_sms
 
-from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer, FullUserLogVerificationSerializer
+from .serializers import CreateUserSerializer, FullIDVerificationSerializer, FullInvestorUserSerializer, FullUserLogVerificationSerializer, FullCompanyUserSerializer
 from .models import InvestorUser, User, InvestorUserAddress, UserLog, IDVerification
 from ..wallets.models import Wallet
 
@@ -106,7 +106,11 @@ class UserAuthViewSet(viewsets.ViewSet):
 					                       device=request.META['HTTP_USER_AGENT'])
 					# Generate Response
 					# Add user to the response data
-					serializer = FullInvestorUserSerializer(user.investor)
+					if user.is_investor:
+						serializer = FullInvestorUserSerializer(user.investor)
+					elif user.is_company_user:
+						serializer = FullCompanyUserSerializer(user.company_user)
+
 					response_data = serializer.data
 					response_data['data'] = 'success'
 					response = Response(response_data, status=status.HTTP_200_OK)
@@ -226,7 +230,11 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 				# Generate Response
 				# Add user to the response data
-				serializer = FullInvestorUserSerializer(user.investor)
+				if user.is_investor:
+					serializer = FullInvestorUserSerializer(user.investor)
+				elif user.is_company_user:
+					serializer = FullCompanyUserSerializer(user.company_user)
+
 				response = Response(serializer.data, status=status.HTTP_200_OK)
 				# Add cookie to the response data
 				response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,
@@ -254,7 +262,11 @@ class UserAuthViewSet(viewsets.ViewSet):
 
 			# Generate Response
 			# Add user to the response data
-			serializer = FullInvestorUserSerializer(user.investor)
+			if user.is_investor:
+				serializer = FullInvestorUserSerializer(user.investor)
+			elif user.is_company_user:
+				serializer = FullCompanyUserSerializer(user.company_user)
+
 			response = Response(serializer.data, status=status.HTTP_200_OK)
 			# Add cookie to the response data
 			response.set_cookie(jwt_settings.JWT_AUTH_COOKIE,
@@ -463,9 +475,17 @@ class UserViewSet(viewsets.ViewSet):
 			# 	pass
 
 			# Retrieve self
-			serializer = FullInvestorUserSerializer(request.user.investor)
+			if request.user.is_investor:
+				serializer = FullInvestorUserSerializer(request.user.investor)
+			elif request.user.is_company_user:
+				serializer = FullCompanyUserSerializer(request.user.company_user)
+
 			return Response(serializer.data)
 		elif request.method == 'PATCH':
+			# Return error message if user is not investor
+			if not request.user.is_investor:
+				return Response(status.HTTP_403_FORBIDDEN)
+
 			# Update Address
 			if request.data.get('update') == 'address':
 				# Check content
@@ -515,7 +535,8 @@ class UserViewSet(viewsets.ViewSet):
 			verification_code = request.user.verification_code
 			verification_code.refresh()
 			ctx = {
-				'user_full_name'   : request.user.investor.full_name,
+				# TODO: Potential Bug. Need to test.
+				'user_full_name'   : request.user.investor.full_name if request.user.investor else request.user.company_user.__str__(),
 				'verification_code': verification_code.code,
 				'user_email'       : request.user.email
 			}
@@ -633,6 +654,8 @@ class UserViewSet(viewsets.ViewSet):
 				           'Link to proceed: https://verifyinvestor.com/issuer/verification/investors'
 			}
 			send_email(['team@gullin.io'], 'A user requested accredited investor verification.', 'gullin_team_notification', ctx)
+			# requests.request('POST', 'https://chat.googleapis.com/v1/spaces/AAAAENCScR0/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=9AB9VmXEKZXb-xaQutMBFp-iG-QV169GfaUsNLe7pGc%3D',
+			#                  json={'text': })
 
 			# Send user email
 			ctx = {

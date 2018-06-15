@@ -59,3 +59,15 @@ class CompanyViewSet(viewsets.ViewSet):
 		press_releases = PressRelease.objects.all()
 		serializer = FullPressReleaseSerializer(press_releases, many=True)
 		return Response(serializer.data)
+
+
+class CompanyPortalViewSet(viewsets.ViewSet):
+	"""
+	The viewset for company module
+	"""
+	parser_classes = (FormParser, JSONParser)
+	permission_classes = (AllowAny,)
+
+	def whitelist(self, request):
+		pass
+
