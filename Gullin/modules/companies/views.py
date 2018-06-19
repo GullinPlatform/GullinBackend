@@ -2,11 +2,11 @@ from django.utils import timezone
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import  AllowAny, IsAuthenticated
 from rest_framework.parsers import FormParser, JSONParser
 
-from .serializers import ListCompanySerializer, FullCompanySerializer, FullPressReleaseSerializer
-from .models import Company, PressRelease
+from .serializers import ListCompanySerializer, FullCompanySerializer, FullPressReleaseSerializer, FullWhitelistSerializer
+from .models import Company, PressRelease, Whitelist
 
 
 class CompanyViewSet(viewsets.ViewSet):
@@ -59,3 +59,15 @@ class CompanyViewSet(viewsets.ViewSet):
 		press_releases = PressRelease.objects.all()
 		serializer = FullPressReleaseSerializer(press_releases, many=True)
 		return Response(serializer.data)
+
+
+class CompanyPortalViewSet(viewsets.ViewSet):
+	parser_classes = (FormParser, JSONParser)
+	permission_classes = (IsAuthenticated,)
+
+	def whitelist(self, request, id):
+		if request.user.is_company_user:
+			company = Whitelist.objects.filter(company=id).first()
+			serializer = FullWhitelistSerializer(company)
+			return Response(serializer.data)
+

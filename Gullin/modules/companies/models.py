@@ -1,5 +1,6 @@
 from django.db import models
 
+from Gullin.modules.users.models import InvestorUser
 from Gullin.utils.upload_dir import company_icon_dir, company_member_avatar_dir
 
 
@@ -202,3 +203,20 @@ class Document(models.Model):
 
 	class Meta:
 		verbose_name_plural = '3. Company Documents'
+
+
+class Whitelist(models.Model):
+	# model keeps track of which users are signed up for which whitelist
+
+	company = models.ForeignKey('Company', related_name='company_whitelist', on_delete=models.PROTECT)
+
+	investor = models.ForeignKey('users.InvestorUser', related_name='investor_whitelist', on_delete=models.PROTECT)
+
+	# Timestamp
+	joined_whitelist = models.DateTimeField(auto_now_add=True)
+
+	pledge_amount = models.FloatField(null=True, blank=True)
+
+	class Meta:
+		verbose_name_plural = '6. Whitelists'
+
