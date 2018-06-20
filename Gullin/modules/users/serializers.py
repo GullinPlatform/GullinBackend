@@ -3,6 +3,16 @@ from rest_framework import serializers
 from .models import (User, InvestorUser, CompanyUser, AnalystUser, InvestorUserAddress,
                      IDVerification, InvestorVerification, VerificationCode, UserLog)
 
+from ..companies.models import Company
+
+
+class BasicCompanySerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Company
+		fields = ('id', 'name', 'logo', 'short_description', 'website',
+		          'created', 'updated',)
+		read_only_fields = ('created', 'updated',)
+
 
 class FullUserSerializer(serializers.ModelSerializer):
 	"""
@@ -75,6 +85,9 @@ class FullInvestorUserSerializer(serializers.ModelSerializer):
 
 
 class FullCompanyUserSerializer(serializers.ModelSerializer):
+	user = BasicUserSerializer()
+	company = BasicCompanySerializer()
+
 	class Meta:
 		model = CompanyUser
 		fields = ('user',
