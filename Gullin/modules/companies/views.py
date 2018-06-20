@@ -65,9 +65,9 @@ class CompanyPortalViewSet(viewsets.ViewSet):
 	parser_classes = (FormParser, JSONParser)
 	permission_classes = (IsAuthenticated,)
 
-	def whitelist(self, request, id):
+	def whitelist(self, request):
 		if request.user.is_company_user:
-			company = Whitelist.objects.filter(company=id).first()
-			serializer = FullWhitelistSerializer(company)
+			company = Whitelist.objects.filter(company=request.user.company_user.company.id)
+			serializer = FullWhitelistSerializer(company, many=True)
 			return Response(serializer.data)
 
