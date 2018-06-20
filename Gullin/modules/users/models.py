@@ -174,8 +174,7 @@ class CompanyUser(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 
 	class Meta:
-		verbose_name = 'Company User'
-		verbose_name_plural = 'Subusers - Company User'
+		verbose_name_plural = '3. Company Users'
 
 	def __str__(self):
 		return self.company.name + ' Admin'
@@ -235,7 +234,7 @@ class InvestorUserAddress(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 
 	class Meta:
-		verbose_name_plural = '3. Investor User Address'
+		verbose_name_plural = '4. Investor User Address'
 
 	def __str__(self):
 		return 'Investor Address'
@@ -281,7 +280,7 @@ class IDVerification(models.Model):
 	updated = models.DateTimeField(auto_now=True)
 
 	class Meta:
-		verbose_name_plural = '4. ID Verifications'
+		verbose_name_plural = '5. ID Verifications'
 
 	def __str__(self):
 		return self.official_id_type
@@ -302,7 +301,7 @@ class InvestorVerification(models.Model):
 	doc2 = models.FileField(upload_to=official_id_dir, null=True, blank=True, storage=S3Boto3Storage(bucket='gullin-id-verification'))
 
 	class Meta:
-		verbose_name_plural = '5. Accredited Investor Verifications'
+		verbose_name_plural = '6. Accredited Investor Verifications'
 
 	def __str__(self):
 		return self.doc_type
@@ -321,7 +320,7 @@ class VerificationCode(models.Model):
 	expire_time = models.DateTimeField(default=timezone.now)
 
 	class Meta:
-		verbose_name_plural = '6. Verification Codes'
+		verbose_name_plural = '7. Verification Codes'
 
 	@property
 	def is_expired(self):
@@ -348,7 +347,7 @@ class UserLog(models.Model):
 	datetime = models.DateTimeField(auto_now_add=True)
 
 	class Meta:
-		verbose_name_plural = '7. User Logs'
+		verbose_name_plural = '8. User Logs'
 		ordering = ['-datetime']
 
 	def __str__(self):
