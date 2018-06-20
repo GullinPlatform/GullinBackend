@@ -37,7 +37,7 @@ class UserAdmin(BaseUserAdmin):
 	)
 	readonly_fields = ('created', 'updated',
 	                   'last_login', 'last_login_ip', 'TOTP_enabled',
-	                   'is_investor', 'is_company_user', 'is_analyst', 'is_active', 'is_staff',
+	                 # 'is_investor', 'is_company_user', 'is_analyst', 'is_active', 'is_staff',
 	                   'edit_investor')
 
 	def edit_investor(self, obj):
