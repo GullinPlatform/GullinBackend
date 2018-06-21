@@ -133,3 +133,12 @@ class FullUserLogVerificationSerializer(serializers.ModelSerializer):
 		model = UserLog
 		fields = ('action', 'ip', 'device', 'datetime',)
 		read_only_fields = ('action', 'ip', 'device', 'datetime',)
+
+
+class BasicInvestorUserSerializer(serializers.ModelSerializer):
+	# TODO get email, full name, eth amount, country
+	user = BasicUserSerializer()
+
+	class Meta:
+		model = InvestorUser
+		fields = ('full_name', 'user', 'nationality')

@@ -1,15 +1,15 @@
 from django.contrib import admin
 
-from .models import Company, CompanyMember, PressRelease, TokenDetail, Document
+from .models import Company, CompanyMember, PressRelease, TokenDetail, Document, Whitelist
 
 
 class CompanyMemberInline(admin.TabularInline):
 	model = CompanyMember
 	show_change_link = True
 	fields = ('avatar', 'first_name', 'last_name',
-	          'title', 'description', 'member_type',
-	          'facebook', 'linkedin', 'website',
-	          'created', 'updated',)
+			  'title', 'description', 'member_type',
+			  'facebook', 'linkedin', 'website',
+			  'created', 'updated',)
 	readonly_fields = ('created', 'updated',)
 	extra = 0
 
@@ -26,7 +26,7 @@ class PressReleaseInline(admin.TabularInline):
 	model = PressRelease
 	show_change_link = True
 	fields = ('title', 'brief', 'url',
-	          'created',)
+			  'created',)
 	extra = 0
 
 
@@ -98,8 +98,12 @@ class TokenDetailAdmin(admin.ModelAdmin):
 		('Token Detail', {'fields': ('token_name', 'token_code', 'token_logo', 'erc20_compliant',)}),
 		('ICO Type', {'fields': ('ico_token_type', 'ico_stage_type',)}),
 		('ICO Time', {'fields': ('start_datetime', 'end_datetime', 'is_finished')}),
-		('Tokenomics', {'fields': ('price', 'price_unit', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit', 'token_distribution')}),
-		('Investment', {'fields': ('threshold', 'bonus', 'restrictions', 'restricted_country_list', 'accredited_investors', 'accredited_investors_country_list')}),
+		('Tokenomics', {'fields': (
+		'price', 'price_unit', 'total_token_supply', 'soft_market_cap', 'hard_market_cap', 'market_cap_unit',
+		'token_distribution')}),
+		('Investment', {'fields': (
+		'threshold', 'bonus', 'restrictions', 'restricted_country_list', 'accredited_investors',
+		'accredited_investors_country_list')}),
 		('Smart Contract Info', {'fields': ('crowd_sale_contract_address', 'token_address', 'decimals',)}),
 		('ICO Stage', {'fields': ('is_finished',)}),
 		('Timestamp', {'fields': ('created', 'updated',)}),
@@ -121,3 +125,19 @@ class DocumentAdmin(admin.ModelAdmin):
 		('Timestamp', {'fields': ('created',)}),
 	)
 	readonly_fields = ('created',)
+
+
+@admin.register(Whitelist)
+class WhitelistAdmin(admin.ModelAdmin):
+	list_display = ('id', 'company', 'investor', 'joined_whitelist', 'pledge_amount')
+	search_fields = ('company', 'investor')
+	ordering = ('joined_whitelist',)
+
+	# Detail Page Settings
+	fieldsets = (
+		('Company Info', {'fields': ('company',)}),
+		('Investor Info', {'fields': ('investor',)}),
+		('Pledge Amount', {'fields': ('pledge_amount',)}),
+		('Timestamp', {'fields': ('joined_whitelist',)}),
+	)
+	readonly_fields = ('joined_whitelist',)
