@@ -1,7 +1,8 @@
 from rest_framework import serializers
 
-from .models import Company, TokenDetail, PressRelease, CompanyMember, Document
+from .models import Company, TokenDetail, PressRelease, CompanyMember, Document, Whitelist
 
+from ..users.serializers import BasicInvestorUserSerializer
 
 class FullTokenDetailSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -77,3 +78,11 @@ class ListCompanySerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Company
 		fields = ('id', 'name', 'token_detail', 'display_img', 'short_description',)
+
+
+class FullWhitelistSerializer(serializers.ModelSerializer):
+	investor = BasicInvestorUserSerializer()
+
+	class Meta:
+		model = Whitelist
+		fields = ('investor', 'pledge_amount')
