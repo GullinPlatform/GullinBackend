@@ -202,3 +202,18 @@ class Document(models.Model):
 
 	class Meta:
 		verbose_name_plural = '3. Company Documents'
+
+
+class KYCData(models.Model):
+	"""
+	UserLog Code model
+	"""
+	investor_user = models.ForeignKey('users.InvestorUser', related_name='kyc_data', on_delete=models.CASCADE)
+	company = models.ForeignKey
+
+	class Meta:
+		verbose_name_plural = '9. KYC Data'
+		ordering = ['-datetime']
+
+	def __str__(self):
+		return 'UserLog ' + self.datetime.isoformat()
