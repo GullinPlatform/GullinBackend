@@ -205,9 +205,12 @@ class Document(models.Model):
 		verbose_name_plural = '3. Company Documents'
 
 
-class Whitelist(models.Model):
-	# model keeps track of which users are signed up for which whitelist
 
+class Whitelist(models.Model):
+  """
+	Whitelist model
+	"""
+	# model keeps track of which users are signed up for which whitelist
 	company = models.ForeignKey('Company', related_name='company_whitelist', on_delete=models.PROTECT)
 
 	investor = models.ForeignKey('users.InvestorUser', related_name='investor_whitelist', on_delete=models.PROTECT)
@@ -219,4 +222,19 @@ class Whitelist(models.Model):
 
 	class Meta:
 		verbose_name_plural = '6. Whitelists'
+
+
+class KYCData(models.Model):
+	"""
+	KYC Data model
+	"""
+	investor_user = models.ForeignKey('users.InvestorUser', related_name='kyc_data', on_delete=models.CASCADE)
+	company = models.ForeignKey
+
+	class Meta:
+		verbose_name_plural = '9. KYC Data'
+		ordering = ['-datetime']
+
+	def __str__(self):
+		return 'UserLog ' + self.datetime.isoformat()
 
