@@ -213,7 +213,7 @@ class Whitelist(models.Model):
 	investor = models.ForeignKey('users.InvestorUser', related_name='investor_whitelist', on_delete=models.PROTECT)
 
 	# Timestamp
-	joined_whitelist = models.DateTimeField(auto_now_add=True)
+	joined_whitelist_timestamp = models.DateTimeField(auto_now_add=True)
 
 	pledge_amount = models.FloatField(null=True, blank=True)
 

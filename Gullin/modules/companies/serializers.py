@@ -85,4 +85,4 @@ class FullWhitelistSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = Whitelist
-		fields = ('investor', 'pledge_amount')
+		fields = ('investor', 'pledge_amount', 'joined_whitelist_timestamp')

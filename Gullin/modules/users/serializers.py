@@ -141,4 +141,4 @@ class BasicInvestorUserSerializer(serializers.ModelSerializer):
 
 	class Meta:
 		model = InvestorUser
-		fields = ('full_name', 'user', 'nationality')
+		fields = ('full_name', 'user', 'nationality', 'verification_level')

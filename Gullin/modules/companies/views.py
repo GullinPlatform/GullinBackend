@@ -1,4 +1,5 @@
 from django.utils import timezone
+from django.core.paginator import Paginator
 
 from rest_framework import viewsets, status
 from rest_framework.response import Response
@@ -67,7 +68,32 @@ class CompanyPortalViewSet(viewsets.ViewSet):
 
 	def whitelist(self, request):
 		if request.user.is_company_user:
-			company = Whitelist.objects.filter(company=request.user.company_user.company.id)
-			serializer = FullWhitelistSerializer(company, many=True)
+			if request.GET.get('category') == 'name':
+				if request.GET.get('direction') == 'descending':
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by('-investor__last_name')
+				else:
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by(
+						'investor__last_name')
+			elif request.GET.get('category') == 'nationality':
+				if request.GET.get('direction') == 'descending':
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by('-investor__nationality')
+				else:
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by(
+						'investor__nationality')
+			elif request.GET.get('category') == 'pledge_amount':
+				if request.GET.get('direction') == 'descending':
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by('-pledge_amount')
+				else:
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by(
+						'pledge_amount')
+			elif request.GET.get('category') == 'joined_whitelist':
+				if request.GET.get('direction') == 'descending':
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by('-joined_whitelist_timestamp')
+				else:
+					whitelist = Whitelist.objects.filter(company=request.user.company_user.company.id).order_by(
+						'joined_whitelist_timestamp')
+			paginator = Paginator(whitelist, 50)
+			page_number = request.GET.get('page_number')
+			whitelist = paginator.get_page(page_number)
+			serializer = FullWhitelistSerializer(whitelist, many=True)
 			return Response(serializer.data)
-

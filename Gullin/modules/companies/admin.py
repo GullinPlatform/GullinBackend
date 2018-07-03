@@ -129,15 +129,15 @@ class DocumentAdmin(admin.ModelAdmin):
 
 @admin.register(Whitelist)
 class WhitelistAdmin(admin.ModelAdmin):
-	list_display = ('id', 'company', 'investor', 'joined_whitelist', 'pledge_amount')
+	list_display = ('id', 'company', 'investor', 'joined_whitelist_timestamp', 'pledge_amount')
 	search_fields = ('company', 'investor')
-	ordering = ('joined_whitelist',)
+	ordering = ('joined_whitelist_timestamp',)
 
 	# Detail Page Settings
 	fieldsets = (
 		('Company Info', {'fields': ('company',)}),
 		('Investor Info', {'fields': ('investor',)}),
 		('Pledge Amount', {'fields': ('pledge_amount',)}),
-		('Timestamp', {'fields': ('joined_whitelist',)}),
+		('Timestamp', {'fields': ('joined_whitelist_timestamp',)}),
 	)
-	readonly_fields = ('joined_whitelist',)
+	readonly_fields = ('joined_whitelist_timestamp',)
